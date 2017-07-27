@@ -54,12 +54,9 @@ namespace 付箋アプリ
             this.Width = StkyNote.Size_Width;
             this.Top = StkyNote.Position_Y;
             this.Left = StkyNote.Position_X;
-            //if (string.IsNullOrEmpty(StkyNote.ColorCode) == false)
-            //{
-                //richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(StkyNote.ColorCode, 0));
-                dockPanel_TitleBar.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].TitleColor, 0));
-                richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].NoteColor, 0));
-            //}
+
+            dockPanel_TitleBar.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].TitleColor, 0));
+            richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].NoteColor, 0));
 
             this.Visibility = Visibility.Visible;
         }
@@ -120,7 +117,6 @@ namespace 付箋アプリ
                     range_Body.Load(fStream, DataFormats.Rtf);
                 }
 
-                //range_Body.ApplyPropertyValue(TextElement.FontSizeProperty, "14");
             }
         }
 
@@ -284,14 +280,6 @@ namespace 付箋アプリ
         {
             G_MainWindow.WriteStickyNoteListXML(G_MainWindow.StickyNoteListFilePath);
 
-
-            //int windowCount = Application.Current.Windows.Count;
-            ////見えないMainWindowも含めて。
-            //if (windowCount < 3)
-            //{
-            //    G_MainWindow.WriteStickyNoteListXML(G_MainWindow.StickyNoteListFilePath);
-            //    Application.Current.Shutdown();
-            //}
         }
 
         private void Button_Color_Click(object sender, RoutedEventArgs e)
