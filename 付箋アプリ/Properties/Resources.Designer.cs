@@ -103,6 +103,16 @@ namespace 付箋アプリ.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Icon_HideWindow {
+            get {
+                object obj = ResourceManager.GetObject("Icon_HideWindow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Icon_Save {
             get {
                 object obj = ResourceManager.GetObject("Icon_Save", resourceCulture);

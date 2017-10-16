@@ -12,28 +12,48 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+
+
 namespace 付箋アプリ
 {
     /// <summary>
-    /// 付箋Window.xaml の相互作用ロジック
+    /// 各付箋を表すクラス
     /// </summary>
     public partial class 付箋Window : Window
     {
+        #region メンバ変数
+        public MainWindow G_MainWindow;//メインウィンドウへのアクセス用
+
+        //こりゃなんだ？
         private StickyNote StkyNote = new StickyNote();
 
-        public MainWindow G_MainWindow;
-
-        public List<BackGroundColorSet> PresetBackGroundColorSet = new List<BackGroundColorSet>()
-        {
-            new BackGroundColorSet{TitleColor="#FFFFDF67",NoteColor="#FFFDF5D6"},
-            new BackGroundColorSet{TitleColor="#FFFCA8A8",NoteColor="#FFFDD6D6"},
-            new BackGroundColorSet{TitleColor="#FFAFE780",NoteColor="#FFCFFBAA"},
-            new BackGroundColorSet{TitleColor="#FF9BD8FA",NoteColor="#FFD6EFFD"},
-            new BackGroundColorSet{TitleColor="#FFC1BAF7",NoteColor="#FFDAD6FD"}
-        };
-
+        //閉じる処理中であることを示すフラグ
         private bool ClosingFlag = false;
 
+        //付箋カラーの初期化。タイトル用の濃い色と編集領域用の薄い色をセットにして登録
+        public List<BackGroundColorSet> PresetBackGroundColorSet = new List<BackGroundColorSet>()
+                                                                    {
+                                                                        new BackGroundColorSet{TitleColor="#FFFFDF67",NoteColor="#FFFDF5D6"},
+                                                                        new BackGroundColorSet{TitleColor="#FFFCA8A8",NoteColor="#FFFDD6D6"},
+                                                                        new BackGroundColorSet{TitleColor="#FFAFE780",NoteColor="#FFCFFBAA"},
+                                                                        new BackGroundColorSet{TitleColor="#FF9BD8FA",NoteColor="#FFD6EFFD"},
+                                                                        new BackGroundColorSet{TitleColor="#FFC1BAF7",NoteColor="#FFDAD6FD"}
+                                                                    };
+        #endregion
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// 付箋ウィンドウのコンストラクタ.
+        /// 空の付箋用。
+        /// 新規作成などで。
+        /// </summary>
         public 付箋Window()
         {
             InitializeComponent();
@@ -41,6 +61,13 @@ namespace 付箋アプリ
             textBox_Title.Text = StkyNote.Title;
             this.Visibility = Visibility.Visible;
         }
+
+        /// <summary>
+        /// 付箋ウィンドウのコンストラクタ
+        /// 既存の付箋用。
+        /// 付箋オブジェクトを受け取って、それを表示する。
+        /// </summary>
+        /// <param name="_stkyNote">付箋オブジェクト</param>
         public 付箋Window(StickyNote _stkyNote)
         {
             InitializeComponent();
@@ -54,12 +81,9 @@ namespace 付箋アプリ
             this.Width = StkyNote.Size_Width;
             this.Top = StkyNote.Position_Y;
             this.Left = StkyNote.Position_X;
-            //if (string.IsNullOrEmpty(StkyNote.ColorCode) == false)
-            //{
-                //richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(StkyNote.ColorCode, 0));
-                dockPanel_TitleBar.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].TitleColor, 0));
-                richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].NoteColor, 0));
-            //}
+
+            dockPanel_TitleBar.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].TitleColor, 0));
+            richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(PresetBackGroundColorSet[StkyNote.ColorNumber].NoteColor, 0));
 
             this.Visibility = Visibility.Visible;
         }
@@ -104,39 +128,45 @@ namespace 付箋アプリ
             }
         }
 
+        /// <summary>
+        /// リッチテキストファイルを、
+        /// リッチテキストコントロールにリッチテキストとして読み込む。
+        /// </summary>
         public void LoadStickyNote()
         {
 
-            if (System.IO.File.Exists(StkyNote.FilePath) == true)
+            if (System.IO.File.Exists(this.StkyNote.FilePath) == true)
             {
-                textBox_Title.Text = StkyNote.Title;
+                this.textBox_Title.Text = this.StkyNote.Title;
 
 
                 TextRange range_Body;
-                range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
+                range_Body = new TextRange(this.richTextBox_Body.Document.ContentStart, this.richTextBox_Body.Document.ContentEnd);
 
                 using (System.IO.FileStream fStream = new System.IO.FileStream(StkyNote.FilePath, System.IO.FileMode.OpenOrCreate))
                 {
                     range_Body.Load(fStream, DataFormats.Rtf);
                 }
 
-                //range_Body.ApplyPropertyValue(TextElement.FontSizeProperty, "14");
             }
         }
 
+        /// <summary>
+        /// 付箋を保存する。
+        /// </summary>
         public void SaveStickyNote()
         {
-            if (string.IsNullOrEmpty(StkyNote.FilePath) == true)
+            if (string.IsNullOrEmpty(this.StkyNote.FilePath) == true)
             {
-                StkyNote.FilePath = G_MainWindow.StickyNoteApplicationFolderPath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + textBox_Title.Text + ".rtf";
+                this.StkyNote.FilePath = G_MainWindow.StickyNoteApplicationFolderPath + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + this.textBox_Title.Text + ".rtf";
             }
 
-            StkyNote.Title = textBox_Title.Text;
+            this.StkyNote.Title = this.textBox_Title.Text;
 
-            TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
-            StkyNote.Body = range_Body.Text;
+            TextRange range_Body = new TextRange(this.richTextBox_Body.Document.ContentStart, this.richTextBox_Body.Document.ContentEnd);
+            this.StkyNote.Body = range_Body.Text;
 
-            using (System.IO.FileStream fStream = new System.IO.FileStream(StkyNote.FilePath, System.IO.FileMode.Create))
+            using (System.IO.FileStream fStream = new System.IO.FileStream(this.StkyNote.FilePath, System.IO.FileMode.Create))
             {
                 range_Body.Save(fStream, DataFormats.Rtf);
             }
@@ -144,14 +174,17 @@ namespace 付箋アプリ
         }
 
 
+        /// <summary>
+        /// 内部の付箋リストを更新する。
+        /// </summary>
         private void UpdateStickyNoteList()
         {
-            StkyNote.Title = textBox_Title.Text;
-            StkyNote.Position_X = this.Left;
-            StkyNote.Position_Y = this.Top;
-            StkyNote.Size_Height = this.Height;
-            StkyNote.Size_Width = this.Width;
-            StkyNote.ColorCode = richTextBox_Body.Background.ToString();
+            this.StkyNote.Title = this.textBox_Title.Text;
+            this.StkyNote.Position_X = this.Left;
+            this.StkyNote.Position_Y = this.Top;
+            this.StkyNote.Size_Height = this.Height;
+            this.StkyNote.Size_Width = this.Width;
+            this.StkyNote.ColorCode = this.richTextBox_Body.Background.ToString();
 
 
             int stickyNoteListIdx = -1;
@@ -169,29 +202,58 @@ namespace 付箋アプリ
 
 
 
-
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// タイトルバーをドラッグすることで、ウィンドウを移動させるため
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            this.DragMove();
-        }
-
-
-
-
-
-        private void label_TitleCover_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            label_TitleCover.Visibility = Visibility.Collapsed;
-            if (textBox_Title.IsFocused == false)
+            try
             {
-                textBox_Title.IsReadOnly = false;
-                textBox_Title.Focus();
-                e.Handled = true;
+                this.DragMove();
+            }
+            catch
+            {
+
             }
         }
 
 
 
+
+
+        /// <summary>
+        /// 付箋のタイトル部分がダブルクリックされたとき、
+        /// タイトルを編集可能にする
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void label_TitleCover_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                label_TitleCover.Visibility = Visibility.Collapsed;
+                if (textBox_Title.IsFocused == false)
+                {
+                    textBox_Title.IsReadOnly = false;
+                    textBox_Title.Focus();
+                    e.Handled = true;
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+
+        /// <summary>
+        /// 付箋のタイトル部分がダブルクリックされたとき、
+        /// タイトルを編集可能にする
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox_Title_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             textBox_Title.IsReadOnly = false;
@@ -227,7 +289,11 @@ namespace 付箋アプリ
         }
 
 
-
+        /// <summary>
+        /// 付箋新規作成ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_NewSticky_Click(object sender, RoutedEventArgs e)
         {
             付箋Window newStickyNote = new 付箋Window();
@@ -235,13 +301,22 @@ namespace 付箋アプリ
             newStickyNote.G_MainWindow = G_MainWindow;
         }
 
+        /// <summary>
+        /// 設定ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Configuration_Click(object sender, RoutedEventArgs e)
         {
             ShowSettingGrid();
         }
 
 
-
+        /// <summary>
+        /// 閉じるボタンが押されたときの処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Delete_Click(object sender, RoutedEventArgs e)
         {
             ClosingFlag = true;
@@ -252,7 +327,7 @@ namespace 付箋アプリ
             //捨てる
             Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(StkyNote.FilePath, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
 
-            //リストから消す
+            //内部のリストから消す
             int stkyNoteListIdx = -1;
             stkyNoteListIdx = G_MainWindow.StickyNoteList.FindIndex(x => x.FilePath == StkyNote.FilePath);
             if (stkyNoteListIdx > -1)
@@ -262,13 +337,23 @@ namespace 付箋アプリ
 
             this.Close();
         }
-
+        
+        /// <summary>
+        /// 保存ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Save_Click(object sender, RoutedEventArgs e)
         {
             SaveStickyNote();
             UpdateStickyNoteList();
         }
 
+        /// <summary>
+        /// 閉じるボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_Close_Click(object sender, RoutedEventArgs e)
         {
             ClosingFlag = true;
@@ -280,20 +365,22 @@ namespace 付箋アプリ
             this.Close();
         }
 
+        /// <summary>
+        /// 付箋ウィンドウを閉じる処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //内部の付箋情報リストをXMLに書き出す。
             G_MainWindow.WriteStickyNoteListXML(G_MainWindow.StickyNoteListFilePath);
-
-
-            //int windowCount = Application.Current.Windows.Count;
-            ////見えないMainWindowも含めて。
-            //if (windowCount < 3)
-            //{
-            //    G_MainWindow.WriteStickyNoteListXML(G_MainWindow.StickyNoteListFilePath);
-            //    Application.Current.Shutdown();
-            //}
         }
 
+        /// <summary>
+        /// 付箋カラーボタンが押されたときの処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_Color_Click(object sender, RoutedEventArgs e)
         {
             Button clickedColorButton = (Button)sender;
@@ -301,6 +388,7 @@ namespace 付箋アプリ
             string titleColor = "";
             string noteColor = "";
 
+            //押されたボタンに応じて色を変更する。
             switch (clickedColorButton.Name)
             {
                 case "button_Color1":
@@ -334,16 +422,22 @@ namespace 付箋アプリ
                     }
             }
 
-
+            //付箋カラーのセット
             titleColor = PresetBackGroundColorSet[StkyNote.ColorNumber].TitleColor;
             noteColor = PresetBackGroundColorSet[StkyNote.ColorNumber].NoteColor;
 
+            //付箋カラーの適用
             dockPanel_TitleBar.Background = new SolidColorBrush(GetArbgColor(titleColor, 0));
             richTextBox_Body.Background = new SolidColorBrush(GetArbgColor(noteColor, 0));
         }
 
 
-
+        /// <summary>
+        /// 付箋ウィンドウが非アクティブになったときの処理
+        /// 保存処理を行う。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Deactivated(object sender, EventArgs e)
         {
             HideSettingGrid();
@@ -355,24 +449,47 @@ namespace 付箋アプリ
             }
         }
 
+        /// <summary>
+        /// 付箋ウィンドウの編集領域が選択されたときの処理。
+        /// 設定領域を隠す。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void richTextBox_Body_GotFocus(object sender, RoutedEventArgs e)
         {
             HideSettingGrid();
         }
 
 
+        /// <summary>
+        /// 設定領域を表示する。
+        /// </summary>
         private void ShowSettingGrid()
         {
+            //設定領域を操作可能にする
+            grid_Setting.IsEnabled = true;
+
+            //設定領域をアニメーションさせて表示する。
             var anim = new System.Windows.Media.Animation.DoubleAnimation(70, (Duration)TimeSpan.FromSeconds(0.1));
             grid_Setting.BeginAnimation(ContentControl.HeightProperty, anim);
         }
+
+        /// <summary>
+        /// 設定領域を隠す
+        /// </summary>
         private void HideSettingGrid()
         {
+            //設定領域を操作不可にする。
+            grid_Setting.IsEnabled = false;
+
+            //設定領域をアニメーションさせて隠す
             var anim = new System.Windows.Media.Animation.DoubleAnimation(0, (Duration)TimeSpan.FromSeconds(0.1));
             grid_Setting.BeginAnimation(ContentControl.HeightProperty, anim);
         }
 
-
+        /// <summary>
+        /// 編集領域の選択部分に消し線をつける。
+        /// </summary>
         private void StrikeThrough()
         {
             TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
@@ -392,6 +509,10 @@ namespace 付箋アプリ
             range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, newTextDecoration);
         }
 
+        /// <summary>
+        /// 編集領域の文字色を赤⇔黒と切り替える
+        /// </summary>
+        /// <param name="_key"></param>
         private void ChangeTextForgroundColor(Key _key)
         {
             TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
@@ -413,6 +534,11 @@ namespace 付箋アプリ
             }
         }
 
+
+        /// <summary>
+        /// 編集領域の背景色を黄色⇔なしと切り替える
+        /// </summary>
+        /// <param name="_key"></param>
         private void ChangeTextBackgroundColor(Key _key)
         {
             TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
@@ -434,6 +560,12 @@ namespace 付箋アプリ
             }
         }
 
+
+        /// <summary>
+        /// 消し線、文字色、背景色の切り替えショートカット
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void richTextBox_Body_KeyDown(object sender, KeyEventArgs e)
         {
             //取り消し線
@@ -462,6 +594,7 @@ namespace 付箋アプリ
                 return;
             }
 
+            //背景色をなしに
             if ((Keyboard.Modifiers == (ModifierKeys.Shift | ModifierKeys.Control)) && (e.Key == Key.Q))
             {
                 ChangeTextBackgroundColor(Key.Q);
@@ -469,7 +602,7 @@ namespace 付箋アプリ
                 e.Handled = true;
                 return;
             }
-
+            //背景色を黄色に
             if ((Keyboard.Modifiers == (ModifierKeys.Shift | ModifierKeys.Control)) && (e.Key == Key.W))
             {
                 ChangeTextBackgroundColor(Key.W);
@@ -479,6 +612,12 @@ namespace 付箋アプリ
             }
         }
 
+        /// <summary>
+        /// マウスホイールによる編集領域のフォントサイズの変更
+        /// 最大２０、最小１２
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void richTextBox_Body_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             bool handle = (Keyboard.Modifiers & ModifierKeys.Control) > 0;
@@ -507,9 +646,5 @@ namespace 付箋アプリ
 
         }
 
-        private void button_Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }
     }
 }
