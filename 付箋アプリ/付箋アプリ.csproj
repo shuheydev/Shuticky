@@ -16,16 +16,18 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>C:\Users\shuhei\Desktop\Shuticy_インストールパック\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticy_インストールパック\</InstallUrl>
+    <UpdateUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticy_インストールパック\</UpdateUrl>
     <ProductName>Shuticy</ProductName>
-    <ApplicationRevision>32</ApplicationRevision>
+    <ApplicationRevision>37</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -188,6 +190,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="128.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icon_HideWindow.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -11,16 +11,17 @@
         BorderBrush="LightGray"
         AllowsTransparency="True" 
         WindowStyle="None"
-        Background="Transparent" Closing="Window_Closing" Deactivated="Window_Deactivated">
+        Background="Transparent" Closing="Window_Closing" Deactivated="Window_Deactivated" MinWidth="250" MinHeight="120">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="1" ResizeBorderThickness="4,0,4,4" />
     </WindowChrome.WindowChrome>
     <Grid>
         <DockPanel>
-            <DockPanel x:Name="dockPanel_TitleBar" DockPanel.Dock="Top" Height="30" Background="#FFFFDF67" MouseDown="TitleBar_MouseDown">
+            <DockPanel x:Name="dockPanel_TitleBar" DockPanel.Dock="Top" Height="30" Background="#FFFFDF67" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="44*"/>
+                        <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
@@ -69,6 +70,11 @@
                         </Button>
                     </Grid>
                     <Grid Grid.Column="5" Grid.RowSpan="2">
+                        <Button x:Name="button_Minimize" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" IsTabStop="False" Click="button_Minimize_Click">
+                            <Image Height="15" Width="15" ToolTip="最小化" Source="Resources/Icon_HideWindow.png" />
+                        </Button>
+                    </Grid>
+                    <Grid Grid.Column="6" Grid.RowSpan="2">
                         <Button x:Name="button_Close" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_Close_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="閉じる" Source="Resources/Icon_Close.png" />
                         </Button>
