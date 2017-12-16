@@ -29,9 +29,9 @@ namespace 付箋アプリ
         public List<StickyNote> StickyNoteList = new List<StickyNote>();
 
 
-        public List<string> StickyNotePathList_Directory = new List<string>();
+        public List<string> StickyNoteFilePathListInDirectory = new List<string>();
 
-
+        public List<string> ClosedStickyNameList = new List<string>();
 
 
         public MainWindow()
@@ -65,7 +65,7 @@ namespace 付箋アプリ
 
             StickyNoteListFilePath = StickyNoteApplicationFolderPath + "\\" + StickyNoteListFileName;
 
-            StickyNotePathList_Directory = System.IO.Directory.GetFiles(StickyNoteApplicationFolderPath, "*.rtf", System.IO.SearchOption.TopDirectoryOnly).ToList();
+            StickyNoteFilePathListInDirectory = System.IO.Directory.GetFiles(StickyNoteApplicationFolderPath, "*.rtf", System.IO.SearchOption.TopDirectoryOnly).ToList();
 
 
             List<StickyNote> stickyNoteList_XML = new List<StickyNote>();
@@ -79,7 +79,7 @@ namespace 付箋アプリ
                 stickyNoteList_XML.FindAll(x =>
                 {
                     string filePath = x.FilePath;
-                    if (StickyNotePathList_Directory.Find(y => y == filePath) != null)
+                    if (StickyNoteFilePathListInDirectory.Find(y => y == filePath) != null)
                     {
                         return true;
                     }
@@ -90,7 +90,7 @@ namespace 付箋アプリ
                 })
                 );
 
-            foreach (string filePath in StickyNotePathList_Directory)
+            foreach (string filePath in StickyNoteFilePathListInDirectory)
             {
                 if (stickyNoteList_XML.Find(x => x.FilePath == filePath) == null)
                 {
@@ -116,9 +116,17 @@ namespace 付箋アプリ
                 付箋Window newStickyNote = new 付箋Window();
 
                 newStickyNote.G_MainWindow = this;
+                newStickyNote.InitNew付箋Window();
             }
+
         }
 
+
+        /// <summary>
+        /// 付箋情報リストの読み込み
+        /// </summary>
+        /// <param name="_filePath"></param>
+        /// <returns></returns>
         public List<StickyNote> ReadStickyNoteListXML(string _filePath)
         {
             List<StickyNote> stickyNoteList = new List<StickyNote>();
@@ -142,7 +150,10 @@ namespace 付箋アプリ
             return stickyNoteList;
         }
 
-
+        /// <summary>
+        /// 付箋情報リストの書き込み
+        /// </summary>
+        /// <param name="_filePath"></param>
         public void WriteStickyNoteListXML(string _filePath)
         {
             if (string.IsNullOrWhiteSpace(_filePath))
@@ -166,6 +177,11 @@ namespace 付箋アプリ
             sw.Close();
         }
 
+        /// <summary>
+        /// メインウィンドウを閉じるときの処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
         }
@@ -178,8 +194,8 @@ namespace 付箋アプリ
         { get; set; }
         public string Title
         { get; set; }
-        public string Body
-        { get; set; }
+        //public string Body
+        //{ get; set; }
 
         public string ColorCode
         { get; set; }
@@ -198,7 +214,7 @@ namespace 付箋アプリ
         {
             FilePath = "";
             Title = "新規メモ";
-            Body = "";
+            //Body = "";
             ColorCode = "";
             ColorNumber = 0;
 

@@ -13,7 +13,7 @@
         WindowStyle="None"
         Background="Transparent" Closing="Window_Closing" Deactivated="Window_Deactivated" MinWidth="250" MinHeight="120">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="1" ResizeBorderThickness="4,0,4,4" />
+        <WindowChrome CaptionHeight="1" ResizeBorderThickness="10,10,10,10" />
     </WindowChrome.WindowChrome>
     <Grid>
         <DockPanel>
@@ -51,6 +51,9 @@
                     </Grid>
                     <Grid Grid.Column="1" Grid.RowSpan="2">
                         <Button x:Name="button_NewSticky" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_NewSticky_Click" IsTabStop="False">
+                            <Button.ContextMenu>
+                                <ContextMenu Name="button_NewSticky_ContextMenu"/>
+                            </Button.ContextMenu>
                             <Image Height="15" Width="15" ToolTip="新規" Source="Resources/Icon_Add.png" />
                         </Button>
                     </Grid>

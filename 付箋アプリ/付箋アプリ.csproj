@@ -14,7 +14,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\shuhei\Desktop\Shuticy_インストールパック\</PublishUrl>
+    <PublishUrl>C:\Users\shuhei\Desktop\Shuticky_インストールパック\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -24,10 +24,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticy_インストールパック\</InstallUrl>
-    <UpdateUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticy_インストールパック\</UpdateUrl>
-    <ProductName>Shuticy</ProductName>
-    <ApplicationRevision>37</ApplicationRevision>
+    <InstallUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticky_インストールパック\</InstallUrl>
+    <UpdateUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticky_インストールパック\</UpdateUrl>
+    <ProductName>Shuticky</ProductName>
+    <ApplicationRevision>38</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
