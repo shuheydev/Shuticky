@@ -27,7 +27,7 @@
     <InstallUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticky_インストールパック\</InstallUrl>
     <UpdateUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticky_インストールパック\</UpdateUrl>
     <ProductName>Shuticky</ProductName>
-    <ApplicationRevision>38</ApplicationRevision>
+    <ApplicationRevision>39</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -111,8 +111,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="付箋Window.xaml.cs">
-      <DependentUpon>付箋Window.xaml</DependentUpon>
+    <Compile Include="ColorConverter.cs" />
+    <Compile Include="ShutickySetting.cs" />
+    <Compile Include="ShutickyWindow.xaml.cs">
+      <DependentUpon>ShutickyWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -126,7 +128,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="付箋Window.xaml">
+    <Page Include="ShutickyWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
