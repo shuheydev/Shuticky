@@ -13,6 +13,6 @@
         BorderThickness="1" 
         BorderBrush="LightGray"
         AllowsTransparency="True" 
-        WindowStyle="None" Visibility="Hidden" Closing="Window_Closing" Icon="Resources/128.ico">
+        WindowStyle="None" Visibility="Hidden" Icon="Resources/128.ico">
 
 </Window>

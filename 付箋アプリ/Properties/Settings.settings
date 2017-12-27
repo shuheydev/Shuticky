@@ -1,7 +1,36 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="付箋アプリ.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ApplicationName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Shuticky</Value>
+    </Setting>
+    <Setting Name="SettingFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ShutickySetting.xml</Value>
+    </Setting>
+    <Setting Name="DefaultShutickyName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">新規メモ</Value>
+    </Setting>
+    <Setting Name="PositionIncrementX" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="PositionIncrementY" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="DefaultPositionX" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="DefaultPositionY" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="DefaultWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">280</Value>
+    </Setting>
+    <Setting Name="DefaultHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">250</Value>
+    </Setting>
+    <Setting Name="OnedriveCommonApplicationFolderName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">アプリ</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
