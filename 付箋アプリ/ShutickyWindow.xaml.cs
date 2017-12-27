@@ -21,6 +21,8 @@ namespace 付箋アプリ
     {
         private ShutickySetting _shutickySetting;
 
+        private bool _deleted = false;
+
         public static readonly List<BackGroundColorSet> PresetBackGroundColorSet = new List<BackGroundColorSet>()
         {
             new BackGroundColorSet{TitleColor="#FFFFDF67",BodyColor="#FFFDF5D6"},
@@ -30,6 +32,8 @@ namespace 付箋アプリ
             new BackGroundColorSet{TitleColor="#FFC1BAF7",BodyColor="#FFDAD6FD"},
         };
 
+        private double _minimumFontSize = 12;
+        private double _maximumFontSize = 20;
 
         public ShutickyWindow(ShutickySetting shutickySetting)
         {
@@ -37,7 +41,7 @@ namespace 付箋アプリ
 
             _shutickySetting = shutickySetting;
 
-            Load(_shutickySetting.FilePath);
+            LoadRTF(_shutickySetting.FilePath);
 
             this.textBox_Title.Text = _shutickySetting.Title;
             this.Height = _shutickySetting.Size_Height;
@@ -47,15 +51,14 @@ namespace 付箋アプリ
 
             SetShutickyColor(_shutickySetting.ColorNumber);
 
-            this.Visibility = Visibility.Visible;
+            SetDisplayStatus(_shutickySetting.DisplayStatus);
+
         }
-
-
 
         /// <summary>
         /// 付箋データの読み込み（rtf）
         /// </summary>
-        private void Load(string filePath)
+        private void LoadRTF(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -72,13 +75,18 @@ namespace 付箋アプリ
                 range_Body.Load(fStream, DataFormats.Rtf);
             }
         }
-
-
         /// <summary>
         /// 付箋データの書き込み(rtf)
         /// </summary>
         public void SaveRTF()
         {
+            //Deleteボタンが押されてShutickyウィンドウが閉じられた時に、
+            //RTFが保存されないようにする。
+            if (this._deleted == true)
+            {
+                return;
+            }
+
             TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
 
             using (FileStream fStream = new FileStream(_shutickySetting.FilePath, FileMode.Create))
@@ -87,14 +95,12 @@ namespace 付箋アプリ
             }
         }
 
-
-
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
 
-        private void label_TitleCover_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void Label_TitleCover_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             label_TitleCover.Visibility = Visibility.Collapsed;
             if (textBox_Title.IsFocused == false)
@@ -105,15 +111,13 @@ namespace 付箋アプリ
             }
         }
 
-
-
-        private void textBox_Title_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TextBox_Title_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             textBox_Title.IsReadOnly = false;
         }
 
         public event EventHandler TitleLostFocus;
-        private void textBox_Title_LostFocus(object sender, RoutedEventArgs e)
+        private void TextBox_Title_LostFocus(object sender, RoutedEventArgs e)
         {
             textBox_Title.IsReadOnly = true;
             label_TitleCover.Visibility = Visibility.Visible;
@@ -124,17 +128,17 @@ namespace 付箋アプリ
             }
         }
 
-        private void textBox_Title_GotFocus(object sender, RoutedEventArgs e)
+        private void TextBox_Title_GotFocus(object sender, RoutedEventArgs e)
         {
             textBox_Title.SelectAll();
         }
 
-        private void textBox_Title_MouseDown(object sender, MouseButtonEventArgs e)
+        private void TextBox_Title_MouseDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
 
-        private void textBox_Title_KeyDown(object sender, KeyEventArgs e)
+        private void TextBox_Title_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
@@ -149,7 +153,7 @@ namespace 付箋アプリ
 
 
         public event EventHandler NewShutickyButtonClicked;
-        private void button_NewShuticky_Click(object sender, RoutedEventArgs e)
+        private void Button_NewShuticky_Click(object sender, RoutedEventArgs e)
         {
             if (NewShutickyButtonClicked != null)
             {
@@ -157,15 +161,20 @@ namespace 付箋アプリ
             }
         }
 
-        private void button_Configuration_Click(object sender, RoutedEventArgs e)
+        private void Button_Configuration_Click(object sender, RoutedEventArgs e)
         {
             ShowSettingGrid();
         }
 
 
         public event EventHandler DeleteButtonClicked;
-        private void button_Delete_Click(object sender, RoutedEventArgs e)
+        private void Button_Delete_Click(object sender, RoutedEventArgs e)
         {
+            //削除フラグをOnにする。
+            //削除ボタンを押して閉じられる時に、
+            //Deactivatedイベントで保存が行われないように。
+            this._deleted = true;
+
             if (DeleteButtonClicked != null)
             {
                 DeleteButtonClicked(this, EventArgs.Empty);
@@ -173,7 +182,7 @@ namespace 付箋アプリ
         }
 
         public event EventHandler SaveButtonClicked;
-        private void button_Save_Click(object sender, RoutedEventArgs e)
+        private void Button_Save_Click(object sender, RoutedEventArgs e)
         {
             if (SaveButtonClicked != null)
             {
@@ -182,7 +191,7 @@ namespace 付箋アプリ
         }
 
         public event EventHandler CloseButtonClicked;
-        private void button_Close_Click(object sender, RoutedEventArgs e)
+        private void Button_Close_Click(object sender, RoutedEventArgs e)
         {
             if (CloseButtonClicked != null)
             {
@@ -196,13 +205,31 @@ namespace 付箋アプリ
         /// </summary>
         public ShutickySetting GetShutickySetting()
         {
-            _shutickySetting.Title = textBox_Title.Text;
+            //状態を更新してから
             _shutickySetting.Position_X = this.Left;
             _shutickySetting.Position_Y = this.Top;
-            _shutickySetting.Size_Height = this.Height;
-            _shutickySetting.Size_Width = this.Width;
+            //ただし幅と高さは、最小化されている場合は更新しない
+            if (_shutickySetting.DisplayStatus != DisplayStatus.Minimize)
+            {
+                _shutickySetting.Size_Height = this.Height;
+                _shutickySetting.Size_Width = this.Width;
+            }
 
             return _shutickySetting;
+        }
+        public void SetShutickySetting(ShutickySetting shutickySetting)
+        {
+            if(shutickySetting==null)
+            {
+                return;
+            }
+
+            _shutickySetting = shutickySetting;
+
+            this.Left = _shutickySetting.Position_X;
+            this.Top = _shutickySetting.Position_Y;
+            this.Width = _shutickySetting.Size_Width;
+            this.Height = _shutickySetting.Size_Height;
         }
 
         /// <summary>
@@ -212,7 +239,12 @@ namespace 付箋アプリ
         /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //this.Close();
+            if (e != null)
+            {
+                e.Cancel = true;
+            }
+
+            SetDisplayStatus(DisplayStatus.Hidden);
         }
 
         /// <summary>
@@ -288,7 +320,7 @@ namespace 付箋アプリ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void richTextBox_Body_GotFocus(object sender, RoutedEventArgs e)
+        private void RichTextBox_Body_GotFocus(object sender, RoutedEventArgs e)
         {
             HideSettingGrid();
         }
@@ -298,7 +330,7 @@ namespace 付箋アプリ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void richTextBox_Body_KeyDown(object sender, KeyEventArgs e)
+        private void RichTextBox_Body_KeyDown(object sender, KeyEventArgs e)
         {
             //取り消し線
             if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control)
@@ -349,7 +381,7 @@ namespace 付箋アプリ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void richTextBox_Body_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void RichTextBox_Body_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             bool handle = (Keyboard.Modifiers & ModifierKeys.Control) > 0;
             if (!handle)
@@ -364,27 +396,31 @@ namespace 付箋アプリ
 
             fontSize = fontSize + (e.Delta / 100);
 
-            if (fontSize < 12)
+            if (fontSize < _minimumFontSize)
             {
-                fontSize = 12;
+                fontSize = _minimumFontSize;
             }
-            if (fontSize > 20)
+            if (fontSize > _maximumFontSize)
             {
-                fontSize = 20;
+                fontSize = _maximumFontSize;
             }
 
             range_Body.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize.ToString());
 
         }
 
+        public event EventHandler MinimizeButtonClicked;
         /// <summary>
         /// ウィンドウ最小化ボタンが押されたときの処理
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button_Minimize_Click(object sender, RoutedEventArgs e)
+        private void Button_Minimize_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            if(MinimizeButtonClicked!=null)
+            {
+                MinimizeButtonClicked(this, EventArgs.Empty);
+            }
         }
 
 
@@ -484,5 +520,32 @@ namespace 付箋アプリ
         }
 
 
+        public void SetDisplayStatus(DisplayStatus displayStatus)
+        {
+            _shutickySetting.DisplayStatus = displayStatus;
+
+            //DisplayStatusに応じて
+            switch (_shutickySetting.DisplayStatus)
+            {
+                case DisplayStatus.Visible:
+                    {
+                        this.WindowState = WindowState.Normal;
+                        this.Visibility = Visibility.Visible;
+                        this.Activate();
+                        break;
+                    }
+                case DisplayStatus.Minimize:
+                    {
+                        //this.Visibility = Visibility.Visible;
+                        this.WindowState = WindowState.Minimized;
+                        break;
+                    }
+                case DisplayStatus.Hidden:
+                    {
+                        this.Visibility = Visibility.Hidden;
+                        break;
+                    }
+            }
+        }
     }
 }

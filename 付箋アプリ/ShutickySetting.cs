@@ -26,6 +26,15 @@ namespace 付箋アプリ
         { get; set; }
         double Size_Height
         { get; set; }
+        DisplayStatus DisplayStatus
+        { get; set; }
+    }
+
+    public enum DisplayStatus
+    {
+        Visible,
+        Minimize,
+        Hidden,
     }
 
     public class ShutickySetting:IShutickySetting
@@ -34,9 +43,6 @@ namespace 付箋アプリ
         { get; set; }
         public string Title
         { get; set; }
-
-        //public string ColorCode
-        //{ get; set; }
         public int ColorNumber
         { get; set; }
         public double Position_X
@@ -47,12 +53,14 @@ namespace 付箋アプリ
         { get; set; }
         public double Size_Height
         { get; set; }
+        public DisplayStatus DisplayStatus
+        { get; set; }
 
         public ShutickySetting(string filePath)
         {
             FilePath = filePath;//RTFファイルのパス
             Title =　Path.GetFileNameWithoutExtension(filePath);
-            //ColorCode = "";
+
             ColorNumber = 0;
 
             Position_X = 20;
@@ -60,6 +68,8 @@ namespace 付箋アプリ
 
             Size_Width = 280;
             Size_Height = 250;
+
+            DisplayStatus = DisplayStatus.Visible;
         }
 
 

@@ -39,53 +39,53 @@
                                  IsReadOnlyCaretVisible="False" 
                                  BorderBrush="{x:Null}" 
                                  BorderThickness="0" 
-                                 LostFocus="textBox_Title_LostFocus" 
+                                 LostFocus="TextBox_Title_LostFocus" 
                                  VerticalAlignment="Center" 
                                  VerticalContentAlignment="Center" 
                                  HorizontalContentAlignment="Center" 
-                                 GotFocus="textBox_Title_GotFocus" 
-                                 KeyDown="textBox_Title_KeyDown" FontSize="14">
+                                 GotFocus="TextBox_Title_GotFocus" 
+                                 KeyDown="TextBox_Title_KeyDown" FontSize="14">
                             付箋アプリ
                         </TextBox>
-                        <Label Name="label_TitleCover" BorderBrush="{x:Null}" BorderThickness="0" Background="#00000000" MouseDoubleClick="label_TitleCover_MouseDoubleClick" Foreground="#FFC7C7C7" />
+                        <Label Name="label_TitleCover" BorderBrush="{x:Null}" BorderThickness="0" Background="#00000000" MouseDoubleClick="Label_TitleCover_MouseDoubleClick" Foreground="#FFC7C7C7" />
                     </Grid>
                     <Grid Grid.Column="1" Grid.RowSpan="2">
-                        <Button x:Name="button_NewSticky" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_NewShuticky_Click" IsTabStop="False">
+                        <Button x:Name="button_NewSticky" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_NewShuticky_Click" IsTabStop="False">
                             <Button.ContextMenu>
-                                <ContextMenu Name="button_NewSticky_ContextMenu"/>
+                                <ContextMenu Name="Button_NewSticky_ContextMenu"/>
                             </Button.ContextMenu>
                             <Image Height="15" Width="15" ToolTip="新規" Source="Resources/Icon_Add.png" />
                         </Button>
                     </Grid>
                     <Grid Grid.Column="2" Grid.RowSpan="2">
-                        <Button x:Name="button_Save" BorderThickness="0"  BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_Save_Click" IsTabStop="False">
+                        <Button x:Name="button_Save" BorderThickness="0"  BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Save_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="保存" Source="Resources/Icon_Save.png" />
                         </Button>
                     </Grid>
                     <Grid Grid.Column="3" Grid.RowSpan="2">
-                        <Button x:Name="button_Configuration" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_Configuration_Click" IsTabStop="False">
+                        <Button x:Name="button_Configuration" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Configuration_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="設定" Source="Resources/Icon_Configration.png" />
                         </Button>
                     </Grid>
                     <Grid Grid.Column="4" Grid.RowSpan="2">
-                        <Button x:Name="button_Delete" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_Delete_Click" IsTabStop="False">
+                        <Button x:Name="button_Delete" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Delete_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="削除" Source="Resources/Icon_Delete.png" />
                         </Button>
                     </Grid>
                     <Grid Grid.Column="5" Grid.RowSpan="2">
-                        <Button x:Name="button_Minimize" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" IsTabStop="False" Click="button_Minimize_Click">
+                        <Button x:Name="button_Minimize" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" IsTabStop="False" Click="Button_Minimize_Click">
                             <Image Height="15" Width="15" ToolTip="最小化" Source="Resources/Icon_HideWindow.png" />
                         </Button>
                     </Grid>
                     <Grid Grid.Column="6" Grid.RowSpan="2">
-                        <Button x:Name="button_Close" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="button_Close_Click" IsTabStop="False">
+                        <Button x:Name="button_Close" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Close_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="閉じる" Source="Resources/Icon_Close.png" />
                         </Button>
                     </Grid>
                 </Grid>
 
             </DockPanel>
-            <RichTextBox Name="richTextBox_Body" Block.LineHeight="1" VerticalScrollBarVisibility="Auto" BorderBrush="{x:Null}" BorderThickness="0" Background="#FFFDF5D6" AcceptsTab="True" GotFocus="richTextBox_Body_GotFocus" KeyDown="richTextBox_Body_KeyDown" FontSize="15" PreviewMouseWheel="richTextBox_Body_PreviewMouseWheel"/>
+            <RichTextBox Name="richTextBox_Body" Block.LineHeight="1" VerticalScrollBarVisibility="Auto" BorderBrush="{x:Null}" BorderThickness="0" Background="#FFFDF5D6" AcceptsTab="True" GotFocus="RichTextBox_Body_GotFocus" KeyDown="RichTextBox_Body_KeyDown" FontSize="15" PreviewMouseWheel="RichTextBox_Body_PreviewMouseWheel"/>
         </DockPanel>
         <Grid Name="grid_Setting" Height="0" VerticalAlignment="Top" Background="white">
             <Button Name="button_Color1" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="30" Height="30" Background="#FFFDF5D6" Click="Button_Color_Click"/>
