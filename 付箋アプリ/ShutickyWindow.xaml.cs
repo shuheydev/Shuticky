@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
 
+
 namespace 付箋アプリ
 {
     /// <summary>
@@ -44,6 +45,7 @@ namespace 付箋アプリ
             LoadRTF(_shutickySetting.FilePath);
 
             this.textBox_Title.Text = _shutickySetting.Title;
+            this.Title = this.textBox_Title.Text;//こちらはWindowコントロールのタイトル。
             this.Height = _shutickySetting.Size_Height;
             this.Width = _shutickySetting.Size_Width;
             this.Top = _shutickySetting.Position_Y;
@@ -219,7 +221,7 @@ namespace 付箋アプリ
         }
         public void SetShutickySetting(ShutickySetting shutickySetting)
         {
-            if(shutickySetting==null)
+            if (shutickySetting == null)
             {
                 return;
             }
@@ -341,34 +343,19 @@ namespace 付箋アプリ
                 return;
             }
 
-            //文字の色を黒に
-            if (e.Key == Key.Q && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                ChangeTextForgroundColor(Key.Q);
-
-                e.Handled = true;
-                return;
-            }
             //文字の色を赤に
             if (e.Key == Key.W && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                ChangeTextForgroundColor(Key.W);
+                ChangeTextForegroundColor();
 
                 e.Handled = true;
                 return;
             }
-            //文字の背景色を変更
-            if ((Keyboard.Modifiers == (ModifierKeys.Shift | ModifierKeys.Control)) && (e.Key == Key.Q))
-            {
-                ChangeTextBackgroundColor(Key.Q);
 
-                e.Handled = true;
-                return;
-            }
             //文字の背景色を変更
-            if ((Keyboard.Modifiers == (ModifierKeys.Shift | ModifierKeys.Control)) && (e.Key == Key.W))
+            if (e.Key == Key.Q && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                ChangeTextBackgroundColor(Key.W);
+                ChangeTextBackgroundColor();
 
                 e.Handled = true;
                 return;
@@ -417,7 +404,7 @@ namespace 付箋アプリ
         /// <param name="e"></param>
         private void Button_Minimize_Click(object sender, RoutedEventArgs e)
         {
-            if(MinimizeButtonClicked!=null)
+            if (MinimizeButtonClicked != null)
             {
                 MinimizeButtonClicked(this, EventArgs.Empty);
             }
@@ -452,45 +439,45 @@ namespace 付箋アプリ
         /// </summary>
         private void StrikeThrough()
         {
-            TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
+            var range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
             var currentTextDecoration = range_Selected.GetPropertyValue(Inline.TextDecorationsProperty);
-
-            TextDecorationCollection newTextDecoration;
-
-            if (currentTextDecoration != DependencyProperty.UnsetValue)
+            
+            if (currentTextDecoration == DependencyProperty.UnsetValue)
             {
-                newTextDecoration = ((TextDecorationCollection)currentTextDecoration == TextDecorations.Strikethrough) ? new TextDecorationCollection() : TextDecorations.Strikethrough;
+                range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, null);
+                return;
+            }
+
+            if (currentTextDecoration.Equals(TextDecorations.Strikethrough))
+            {
+                range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, null);
             }
             else
             {
-                newTextDecoration = TextDecorations.Strikethrough;
+                range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, TextDecorations.Strikethrough);
             }
-
-            range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, newTextDecoration);
         }
 
         /// <summary>
         /// 文字色を変更
         /// </summary>
         /// <param name="_key"></param>
-        private void ChangeTextForgroundColor(Key _key)
+        private void ChangeTextForegroundColor()
         {
             TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
 
-            switch (_key)
+            var foregroundProperty = range_Selected.GetPropertyValue(TextElement.ForegroundProperty);
+            if (foregroundProperty.Equals(DependencyProperty.UnsetValue))//選択範囲に複数の色が存在するとき
             {
-                case Key.Q:
-                    {
-                        range_Selected.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
-
-                        break;
-                    }
-                case Key.W:
-                    {
-                        range_Selected.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
-
-                        break;
-                    }
+                range_Selected.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);//黒にする
+            }
+            else if (foregroundProperty.ToString() == "#FF000000")//黒の時
+            {
+                range_Selected.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);//赤にする
+            }
+            else if (foregroundProperty.ToString() == "#FFFF0000")//赤の時
+            {
+                range_Selected.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);//黒にする
             }
         }
 
@@ -498,24 +485,25 @@ namespace 付箋アプリ
         /// 文字の背景色を変更。
         /// </summary>
         /// <param name="_key"></param>
-        private void ChangeTextBackgroundColor(Key _key)
+        private void ChangeTextBackgroundColor()
         {
             TextRange range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
 
-            switch (_key)
+            var backgroundProperty = range_Selected.GetPropertyValue(TextElement.BackgroundProperty);
+
+            if (backgroundProperty == null)//無色の時は
             {
-                case Key.Q:
-                    {
-                        range_Selected.ApplyPropertyValue(TextElement.BackgroundProperty, null);
+                range_Selected.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Yellow);//黄色に
+                return;
+            }
 
-                        break;
-                    }
-                case Key.W:
-                    {
-                        range_Selected.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Yellow);
-
-                        break;
-                    }
+            if (backgroundProperty.Equals(DependencyProperty.UnsetValue))//無色と黄色の両方が存在するとき
+            {
+                range_Selected.ApplyPropertyValue(TextElement.BackgroundProperty, null);//無色に
+            }
+            else if (backgroundProperty.ToString() == "#FFFFFF00")//黄色の時は
+            {
+                range_Selected.ApplyPropertyValue(TextElement.BackgroundProperty, null);//無色に
             }
         }
 
@@ -546,6 +534,27 @@ namespace 付箋アプリ
                         break;
                     }
             }
+        }
+
+        public void SetDisplayPosition(double x,double y)
+        {
+            this.Top = y;
+            this.Left = x;
+        }
+
+        private void MenuItem_StrikeThrough_Click(object sender, RoutedEventArgs e)
+        {
+            StrikeThrough();
+        }
+
+        private void MenuItem_ChangeTextForegroundColor_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeTextForegroundColor();
+        }
+
+        private void menuItem_ChangeTextBackgroundColor_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeTextBackgroundColor();
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Windows;
 using System.IO;
 using System.Threading;
 using System.Xml.Serialization;
+using System.Reflection;
 
 
 namespace 付箋アプリ
@@ -30,6 +31,7 @@ namespace 付箋アプリ
         private readonly string _shutickySettingFileName = 付箋アプリ.Properties.Settings.Default.SettingFileName;
         private readonly string _defaultShutickyName = 付箋アプリ.Properties.Settings.Default.DefaultShutickyName;
         private readonly string _onedriveCommonApplicationFolderName = 付箋アプリ.Properties.Settings.Default.OnedriveCommonApplicationFolderName;
+        private string _helpFilePath = "";
 
         private List<ShutickyWindow> _shutickyWindows = new List<ShutickyWindow>();
 
@@ -60,13 +62,21 @@ namespace 付箋アプリ
             this._notifyIcon.ContextMenuItem_New_Clicked += ContextMenuItem_New_Clicked;
             this._notifyIcon.ContextMenuItem_ShowAll_Clicked += ContextMenuItem_ShowAll_Clicked;
             this._notifyIcon.ContextMenuItem_MinimizeAll_Clicked += ContextMenuItem_MinimizeAll_Clicked;
+            this._notifyIcon.ContextMenuItem_Help_Clicked += ContextMenuItem_Help_Clicked;
+
+            //インストール先のフォルダにヘルプファイル(html)を配置する
+            var asm = Assembly.GetEntryAssembly();
+            var appExeFilePath = asm.Location;
+            var appExeFolderPath = Path.GetDirectoryName(appExeFilePath);
+            _helpFilePath = Path.Combine(appExeFolderPath, "help.html");
+            File.WriteAllText(_helpFilePath, 付箋アプリ.Properties.Resources.Help);
 
             try
             {
                 //OneDriveのフォルダのパスを取得
-                const string userRoot = "HKEY_CURRENT_USER";
-                const string subkey = @"Software\Microsoft\OneDrive";
-                const string keyName = userRoot + "\\" + subkey;
+                string userRoot = "HKEY_CURRENT_USER";
+                string subkey = @"Software\Microsoft\OneDrive";
+                string keyName = Path.Combine(userRoot, subkey);
 
                 //OneDriveフォルダのパスを取得
                 string oneDrivePath = (string)Microsoft.Win32.Registry.GetValue(keyName, "UserFolder", "Return this default if NoSuchName does not exist.");
@@ -136,8 +146,22 @@ namespace 付箋アプリ
                 {
                     try
                     {
+                        //ウィンドウの座標が画面外の場合がある。
+                        //マルチウィンドウで終了し、シングルウィンドウで起動したときなど。
+                        //この場合は、座標を修正する。
+                        if (shutickySetting.Position_X + 100 > SystemParameters.VirtualScreenWidth)
+                        {
+                            shutickySetting.Position_X = shutickySetting.Position_X % SystemParameters.VirtualScreenWidth;
+                        }
+
+                        if (shutickySetting.Position_Y + 100 > SystemParameters.VirtualScreenHeight)
+                        {
+                            shutickySetting.Position_Y = shutickySetting.Position_Y % SystemParameters.VirtualScreenHeight;
+                        }
+
                         //付箋ウィンドウをインスタンス化
                         var shutickyWindow = new ShutickyWindow(shutickySetting);
+
                         //イベントハンドラを登録
                         AddEventHandlersToShutickyWindow(shutickyWindow);
 
@@ -157,6 +181,7 @@ namespace 付箋アプリ
                 AddNewShutickyWindow(newShutickySetting);
             }
         }
+
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
@@ -337,12 +362,12 @@ namespace 付箋アプリ
 
             //ファイル名を変更
             File.Move(senderSetting.FilePath, newFilePath);
-
             //付箋データファイル名を変更
             senderSetting.Title = newTitle;
-
             //付箋データのファイルパスを変更。
             senderSetting.FilePath = newFilePath;
+            //付箋WindowのTitleを変更。
+            senderWindow.Title = senderWindow.textBox_Title.Text;
 
 
             //現在の設定内容でセッティングリストの該当データを更新
@@ -395,6 +420,9 @@ namespace 付箋アプリ
 
             //セッティングファイルを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
+
+            //RTFを作成。
+            newShutickyWindow.SaveRTF();
         }
         private void UpdateShutickyWindows(ShutickySetting shutickySetting)
         {
@@ -462,7 +490,7 @@ namespace 付箋アプリ
                 return;
             }
 
-            List<ShutickySetting> shutickySettings=null;
+            List<ShutickySetting> shutickySettings = null;
             XmlSerializer serializer = null;
             StreamWriter strmWriter = null;
             try
@@ -519,11 +547,11 @@ namespace 付箋アプリ
                         newY += _positionIncrementY;
 
                         //画面外にはみ出さないようにする。
-                        if (newX + _defaultWidth + 50 > System.Windows.SystemParameters.WorkArea.Width)
+                        if (newX + _defaultWidth + 50 > SystemParameters.VirtualScreenWidth)//マルチモニター全体の幅
                         {
                             newX = _defaultPositionX;
                         }
-                        if (newY + _defaultHeight + 50 > System.Windows.SystemParameters.WorkArea.Height)
+                        if (newY + _defaultHeight + 50 > SystemParameters.VirtualScreenHeight)//マルチモニター全体の高さ。
                         {
                             newY = _defaultPositionY;
                         }
@@ -570,6 +598,10 @@ namespace 付箋アプリ
                     continue;
                 }
             }
+        }
+        private void ContextMenuItem_Help_Clicked(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(_helpFilePath);
         }
     }
 }
