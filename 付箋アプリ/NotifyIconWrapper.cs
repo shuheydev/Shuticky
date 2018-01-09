@@ -17,7 +17,9 @@ namespace 付箋アプリ
             this.toolStripMenuItem_Exit.Click += this.ContextMenuItem_Exit_Click;
             this.toolStripMenuItem_ShowAll.Click += this.ContextMenuItem_ShowAll_Click;
             this.toolStripMenuItem_MinimizeAll.Click += this.ContextMenuItem_MinimizeAll_Click;
+            this.toolStripMenuItem_Help.Click += this.ContextMenuItem_Help_Click;
         }
+
 
 
         public NotifyIconWrapper(IContainer container)
@@ -25,6 +27,15 @@ namespace 付箋アプリ
             container.Add(this);
 
             InitializeComponent();
+        }
+
+        public event EventHandler ContextMenuItem_Help_Clicked;
+        private void ContextMenuItem_Help_Click(object sender, EventArgs e)
+        {
+            if (ContextMenuItem_Help_Clicked!=null)
+            {
+                ContextMenuItem_Help_Clicked(this, EventArgs.Empty);
+            }
         }
 
         public event EventHandler ContextMenuItem_Exit_Clicked;

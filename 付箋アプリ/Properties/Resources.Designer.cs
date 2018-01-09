@@ -61,6 +61,24 @@ namespace 付箋アプリ.Properties {
         }
         
         /// <summary>
+        ///   &lt;html&gt;
+        ///&lt;head&gt;
+        ///&lt;title&gt;Shutickyヘルプ&lt;/title&gt;
+        ///&lt;/head&gt;
+        ///&lt;body&gt;
+        ///テスト&lt;br/&gt;
+        ///テスト２&lt;br/&gt;
+        ///テスト３&lt;br/&gt;
+        ///&lt;/body&gt;
+        ///&lt;/html&gt; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Help {
+            get {
+                return ResourceManager.GetString("Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Bitmap Icon_Add {

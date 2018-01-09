@@ -11,7 +11,11 @@
         BorderBrush="LightGray"
         AllowsTransparency="True" 
         WindowStyle="None"
-        Background="Transparent" Closing="Window_Closing" Deactivated="Window_Deactivated" MinWidth="250" MinHeight="120">
+        Background="Transparent" 
+        Closing="Window_Closing" 
+        Deactivated="Window_Deactivated" 
+        MinWidth="250" 
+        MinHeight="120">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="1" ResizeBorderThickness="10,10,10,10" />
     </WindowChrome.WindowChrome>
@@ -51,9 +55,6 @@
                     </Grid>
                     <Grid Grid.Column="1" Grid.RowSpan="2">
                         <Button x:Name="button_NewSticky" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_NewShuticky_Click" IsTabStop="False">
-                            <Button.ContextMenu>
-                                <ContextMenu Name="Button_NewSticky_ContextMenu"/>
-                            </Button.ContextMenu>
                             <Image Height="15" Width="15" ToolTip="新規" Source="Resources/Icon_Add.png" />
                         </Button>
                     </Grid>
@@ -85,7 +86,29 @@
                 </Grid>
 
             </DockPanel>
-            <RichTextBox Name="richTextBox_Body" Block.LineHeight="1" VerticalScrollBarVisibility="Auto" BorderBrush="{x:Null}" BorderThickness="0" Background="#FFFDF5D6" AcceptsTab="True" GotFocus="RichTextBox_Body_GotFocus" KeyDown="RichTextBox_Body_KeyDown" FontSize="15" PreviewMouseWheel="RichTextBox_Body_PreviewMouseWheel"/>
+            <RichTextBox Name="richTextBox_Body" 
+                         Block.LineHeight="1" 
+                         VerticalScrollBarVisibility="Auto" 
+                         BorderBrush="{x:Null}" 
+                         BorderThickness="0" 
+                         Background="#FFFDF5D6" 
+                         AcceptsTab="True" 
+                         FontSize="15" 
+                         GotFocus="RichTextBox_Body_GotFocus" 
+                         KeyDown="RichTextBox_Body_KeyDown" 
+                         PreviewMouseWheel="RichTextBox_Body_PreviewMouseWheel">
+                <RichTextBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Command="ApplicationCommands.Cut"/>
+                        <MenuItem Command="ApplicationCommands.Copy"/>
+                        <MenuItem Command="ApplicationCommands.Paste"/>
+                        <Separator/>
+                        <MenuItem Name="menuItem_StrikeThrough" Header="消し線" Click="MenuItem_StrikeThrough_Click"/>
+                        <MenuItem Name="menuItem_ChangeTextForegroundColor" Header="文字色" Click="MenuItem_ChangeTextForegroundColor_Click"/>
+                        <MenuItem Name="menuItem_ChangeTextBackgroundColor" Header="背景色" Click="menuItem_ChangeTextBackgroundColor_Click"/>
+                    </ContextMenu>
+                </RichTextBox.ContextMenu>
+            </RichTextBox>
         </DockPanel>
         <Grid Name="grid_Setting" Height="0" VerticalAlignment="Top" Background="white">
             <Button Name="button_Color1" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="30" Height="30" Background="#FFFDF5D6" Click="Button_Color_Click"/>
