@@ -124,10 +124,7 @@ namespace 付箋アプリ
             textBox_Title.IsReadOnly = true;
             label_TitleCover.Visibility = Visibility.Visible;
 
-            if (TitleLostFocus != null)
-            {
-                TitleLostFocus(this, EventArgs.Empty);
-            }
+            TitleLostFocus?.Invoke(this, EventArgs.Empty);
         }
 
         private void TextBox_Title_GotFocus(object sender, RoutedEventArgs e)
@@ -157,10 +154,7 @@ namespace 付箋アプリ
         public event EventHandler NewShutickyButtonClicked;
         private void Button_NewShuticky_Click(object sender, RoutedEventArgs e)
         {
-            if (NewShutickyButtonClicked != null)
-            {
-                NewShutickyButtonClicked(this, EventArgs.Empty);
-            }
+            NewShutickyButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
         private void Button_Configuration_Click(object sender, RoutedEventArgs e)
@@ -177,28 +171,19 @@ namespace 付箋アプリ
             //Deactivatedイベントで保存が行われないように。
             this._deleted = true;
 
-            if (DeleteButtonClicked != null)
-            {
-                DeleteButtonClicked(this, EventArgs.Empty);
-            }
+            DeleteButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler SaveButtonClicked;
         private void Button_Save_Click(object sender, RoutedEventArgs e)
         {
-            if (SaveButtonClicked != null)
-            {
-                SaveButtonClicked(this, EventArgs.Empty);
-            }
+            SaveButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler CloseButtonClicked;
         private void Button_Close_Click(object sender, RoutedEventArgs e)
         {
-            if (CloseButtonClicked != null)
-            {
-                CloseButtonClicked(this, EventArgs.Empty);
-            }
+            CloseButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -303,7 +288,7 @@ namespace 付箋アプリ
             string titleColorCode = PresetBackGroundColorSet[_shutickySetting.ColorNumber].TitleColor;
             string bodyColorCode = PresetBackGroundColorSet[_shutickySetting.ColorNumber].BodyColor;
             dockPanel_TitleBar.Background = new SolidColorBrush(ColorConverter.GetArbgColor(titleColorCode, 0));
-            richTextBox_Body.Background = new SolidColorBrush(ColorConverter.GetArbgColor(bodyColorCode, 0));
+            dockPanel_Body.Background = new SolidColorBrush(ColorConverter.GetArbgColor(bodyColorCode, 0));
         }
 
 
@@ -376,10 +361,10 @@ namespace 付箋アプリ
                 return;
             }
 
-            double fontSize = 0.0;
+            //var fontSize = 0.0;
 
             TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
-            double.TryParse(range_Body.GetPropertyValue(TextElement.FontSizeProperty).ToString(), out fontSize);
+            double.TryParse(range_Body.GetPropertyValue(TextElement.FontSizeProperty).ToString(), out double fontSize);
 
             fontSize = fontSize + (e.Delta / 100);
 
@@ -404,10 +389,7 @@ namespace 付箋アプリ
         /// <param name="e"></param>
         private void Button_Minimize_Click(object sender, RoutedEventArgs e)
         {
-            if (MinimizeButtonClicked != null)
-            {
-                MinimizeButtonClicked(this, EventArgs.Empty);
-            }
+            MinimizeButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -552,9 +534,14 @@ namespace 付箋アプリ
             ChangeTextForegroundColor();
         }
 
-        private void menuItem_ChangeTextBackgroundColor_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_ChangeTextBackgroundColor_Click(object sender, RoutedEventArgs e)
         {
             ChangeTextBackgroundColor();
+        }
+
+        private void MenuItem_WindowTopMost_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

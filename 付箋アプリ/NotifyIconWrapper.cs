@@ -32,46 +32,31 @@ namespace 付箋アプリ
         public event EventHandler ContextMenuItem_Help_Clicked;
         private void ContextMenuItem_Help_Click(object sender, EventArgs e)
         {
-            if (ContextMenuItem_Help_Clicked!=null)
-            {
-                ContextMenuItem_Help_Clicked(this, EventArgs.Empty);
-            }
+            ContextMenuItem_Help_Clicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler ContextMenuItem_Exit_Clicked;
         private void ContextMenuItem_Exit_Click(object sender, EventArgs e)
         {
-            if(ContextMenuItem_Exit_Clicked!=null)
-            {
-                ContextMenuItem_Exit_Clicked(this, EventArgs.Empty);
-            }
+            ContextMenuItem_Exit_Clicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler ContextMenuItem_New_Clicked;
         private void ContextMenuItem_New_Click(object sender, EventArgs e)
         {
-           if(ContextMenuItem_New_Clicked!=null)
-            {
-                ContextMenuItem_New_Clicked(this, EventArgs.Empty);
-            }
+            ContextMenuItem_New_Clicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler ContextMenuItem_ShowAll_Clicked;
         private void ContextMenuItem_ShowAll_Click(object sender, EventArgs e)
         {
-            if(ContextMenuItem_ShowAll_Clicked!=null)
-            {
-                ContextMenuItem_ShowAll_Clicked(this, EventArgs.Empty);
-            }
+            ContextMenuItem_ShowAll_Clicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler ContextMenuItem_MinimizeAll_Clicked;
         private void ContextMenuItem_MinimizeAll_Click(object sender, EventArgs e)
         {
-            if(ContextMenuItem_MinimizeAll_Clicked!=null)
-            {
-                ContextMenuItem_MinimizeAll_Clicked(this, EventArgs.Empty);
-            }
+            ContextMenuItem_MinimizeAll_Clicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }
