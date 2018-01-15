@@ -31,6 +31,7 @@
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="25"/>
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Column="0" Grid.RowSpan="2">
                         <TextBox Name="textBox_Title" 
@@ -74,11 +75,16 @@
                         </Button>
                     </Grid>
                     <Grid Grid.Column="5" Grid.RowSpan="2">
+                        <Button x:Name="button_Pin" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Pin_Click" IsTabStop="False">
+                            <Image Name="image_Pin" Height="15" Width="15" ToolTip="ピン留め" Source="Resources/Icon_Pinned.png" />
+                        </Button>
+                    </Grid>
+                    <Grid Grid.Column="6" Grid.RowSpan="2">
                         <Button x:Name="button_Minimize" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" IsTabStop="False" Click="Button_Minimize_Click">
                             <Image Height="15" Width="15" ToolTip="最小化" Source="Resources/Icon_HideWindow.png" />
                         </Button>
                     </Grid>
-                    <Grid Grid.Column="6" Grid.RowSpan="2">
+                    <Grid Grid.Column="7" Grid.RowSpan="2">
                         <Button x:Name="button_Close" BorderThickness="0" BorderBrush="{x:Null}" Background="#00000000" Foreground="DimGray" Click="Button_Close_Click" IsTabStop="False">
                             <Image Height="15" Width="15" ToolTip="閉じる" Source="Resources/Icon_Close.png" />
                         </Button>
@@ -106,7 +112,6 @@
                         <MenuItem Name="menuItem_StrikeThrough" Header="消し線" Click="MenuItem_StrikeThrough_Click"/>
                         <MenuItem Name="menuItem_ChangeTextForegroundColor" Header="文字色" Click="MenuItem_ChangeTextForegroundColor_Click"/>
                         <MenuItem Name="menuItem_ChangeTextBackgroundColor" Header="背景色" Click="MenuItem_ChangeTextBackgroundColor_Click"/>
-                        <MenuItem Name="menuItem_WindowTopMost" Header="最前面に固定" Click="menuItem_WindowTopMost_Click"/>
                     </ContextMenu>
                 </RichTextBox.ContextMenu>
             </RichTextBox>

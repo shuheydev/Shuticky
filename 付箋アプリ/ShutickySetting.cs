@@ -14,8 +14,6 @@ namespace 付箋アプリ
         string Title
         { get; set; }
 
-        //string ColorCode
-        //{ get; set; }
         int ColorNumber
         { get; set; }
         double Position_X
@@ -27,6 +25,8 @@ namespace 付箋アプリ
         double Size_Height
         { get; set; }
         DisplayStatus DisplayStatus
+        { get; set; }
+        bool IsPinned
         { get; set; }
     }
 
@@ -55,6 +55,8 @@ namespace 付箋アプリ
         { get; set; }
         public DisplayStatus DisplayStatus
         { get; set; }
+        public bool IsPinned
+        { get; set; }
 
         public ShutickySetting(string filePath)
         {
@@ -70,6 +72,8 @@ namespace 付箋アプリ
             Size_Height = 250;
 
             DisplayStatus = DisplayStatus.Visible;
+
+            IsPinned = false;
         }
 
 

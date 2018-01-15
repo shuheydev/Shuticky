@@ -66,9 +66,11 @@ namespace 付箋アプリ.Properties {
         ///&lt;title&gt;Shutickyヘルプ&lt;/title&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
-        ///テスト&lt;br/&gt;
-        ///テスト２&lt;br/&gt;
-        ///テスト３&lt;br/&gt;
+        ///Ctrl+W　選択中の文字色の「赤⇔黒」切り替え。&lt;br/&gt;
+        ///Ctrl+Q　選択中の文字背景色の「黄色⇔なし」切り替え。&lt;br/&gt;
+        ///Ctrl+D　選択中の文字の「消し線⇔なし」切り替え。&lt;br/&gt;
+        ///Ctrl+B　選択中の文字の「太字⇔通常」切り替え。&lt;br/&gt;
+        ///Ctrl+I　選択中の文字を「斜体⇔通常」切り替え。&lt;br/&gt;
         ///&lt;/body&gt;
         ///&lt;/html&gt; に類似しているローカライズされた文字列を検索します。
         /// </summary>
@@ -131,9 +133,29 @@ namespace 付箋アプリ.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Icon_Pinned {
+            get {
+                object obj = ResourceManager.GetObject("Icon_Pinned", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Icon_Save {
             get {
                 object obj = ResourceManager.GetObject("Icon_Save", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Icon_Unpin {
+            get {
+                object obj = ResourceManager.GetObject("Icon_Unpin", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -51,6 +51,7 @@ namespace 付箋アプリ
             this.Top = _shutickySetting.Position_Y;
             this.Left = _shutickySetting.Position_X;
 
+            SetPinStatus(_shutickySetting.IsPinned);
             SetShutickyColor(_shutickySetting.ColorNumber);
 
             SetDisplayStatus(_shutickySetting.DisplayStatus);
@@ -174,6 +175,18 @@ namespace 付箋アプリ
             DeleteButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
+        private void Button_Pin_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Topmost == true)
+            {//ピン留めされていた場合
+                SetPinStatus(false);
+            }
+            else
+            {//ピン留めされていない場合
+                SetPinStatus(true);
+            }
+        }
+
         public event EventHandler SaveButtonClicked;
         private void Button_Save_Click(object sender, RoutedEventArgs e)
         {
@@ -202,6 +215,8 @@ namespace 付箋アプリ
                 _shutickySetting.Size_Width = this.Width;
             }
 
+            _shutickySetting.IsPinned = this.Topmost;
+
             return _shutickySetting;
         }
         public void SetShutickySetting(ShutickySetting shutickySetting)
@@ -217,6 +232,7 @@ namespace 付箋アプリ
             this.Top = _shutickySetting.Position_Y;
             this.Width = _shutickySetting.Size_Width;
             this.Height = _shutickySetting.Size_Height;
+
         }
 
         /// <summary>
@@ -423,7 +439,7 @@ namespace 付箋アプリ
         {
             var range_Selected = new TextRange(richTextBox_Body.Selection.Start, richTextBox_Body.Selection.End);
             var currentTextDecoration = range_Selected.GetPropertyValue(Inline.TextDecorationsProperty);
-            
+
             if (currentTextDecoration == DependencyProperty.UnsetValue)
             {
                 range_Selected.ApplyPropertyValue(Inline.TextDecorationsProperty, null);
@@ -518,11 +534,40 @@ namespace 付箋アプリ
             }
         }
 
-        public void SetDisplayPosition(double x,double y)
+        public void SetDisplayPosition(double x, double y)
         {
             this.Top = y;
             this.Left = x;
         }
+
+        //private void ChangePinStatus()
+        //{
+        //    if (this.Topmost == true)
+        //    {//ピン留めされていた場合
+        //        SetPinStatus(false);
+        //    }
+        //    else
+        //    {//ピン留めされていない場合
+        //        SetPinStatus(true);
+        //    }
+        //}
+
+        private void SetPinStatus(bool pinned)
+        {
+            this.Topmost = pinned;
+
+            if(pinned)
+            {
+                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_UnPin.png", UriKind.Relative));//アイコンをピン留め解除にする
+                button_Pin.ToolTip = "ピン留めを外す";
+            }
+            else
+            {
+                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_Pinned.png", UriKind.Relative));//アイコンをピン留めにする
+                button_Pin.ToolTip = "ピン留め";
+            }
+        }
+
 
         private void MenuItem_StrikeThrough_Click(object sender, RoutedEventArgs e)
         {
@@ -539,9 +584,6 @@ namespace 付箋アプリ
             ChangeTextBackgroundColor();
         }
 
-        private void MenuItem_WindowTopMost_Click(object sender, RoutedEventArgs e)
-        {
 
-        }
     }
 }

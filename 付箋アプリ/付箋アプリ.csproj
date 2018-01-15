@@ -27,7 +27,7 @@
     <MapFileExtensions>true</MapFileExtensions>
     <UpdateUrl>\\Db-section\中抄業務課\★周平\インストーラ置き場\Shuticky_インストールパック\</UpdateUrl>
     <ProductName>Shuticky</ProductName>
-    <ApplicationRevision>55</ApplicationRevision>
+    <ApplicationRevision>57</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -233,6 +233,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Help.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icon_Pinned.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icon_Unpin.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

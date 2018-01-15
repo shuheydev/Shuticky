@@ -275,7 +275,7 @@ namespace 付箋アプリ
             var senderSetting = senderWindow.GetShutickySetting();
 
             //現在の設定内容でセッティングリストの該当データを更新
-            UpdateShutickyWindows(senderSetting);
+            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
@@ -311,7 +311,7 @@ namespace 付箋アプリ
         {
             var senderWindow = sender as ShutickyWindow;
             var senderSetting = senderWindow.GetShutickySetting();
-            UpdateShutickyWindows(senderSetting);
+            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
@@ -371,7 +371,7 @@ namespace 付箋アプリ
 
 
             //現在の設定内容でセッティングリストの該当データを更新
-            UpdateShutickyWindows(senderSetting);
+            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
@@ -387,7 +387,7 @@ namespace 付箋アプリ
             senderWindow.SetDisplayStatus(DisplayStatus.Hidden);
 
             //現在の設定内容でセッティングリストの該当データを更新
-            UpdateShutickyWindows(senderSetting);
+            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
@@ -424,22 +424,22 @@ namespace 付箋アプリ
             //RTFを作成。
             newShutickyWindow.SaveRTF();
         }
-        private void UpdateShutickyWindows(ShutickySetting shutickySetting)
-        {
-            var shutickySettingIdx = _shutickyWindows.FindIndex(x => x.GetShutickySetting().FilePath == shutickySetting.FilePath);
+        //private void UpdateShutickyWindows(ShutickySetting shutickySetting)
+        //{
+        //    var shutickySettingIdx = _shutickyWindows.FindIndex(x => x.GetShutickySetting().FilePath == shutickySetting.FilePath);
 
-            if (shutickySettingIdx > -1)
-            {
-                try
-                {
-                    _shutickyWindows[shutickySettingIdx].SetShutickySetting(shutickySetting);
-                }
-                catch
-                {
-                    return;
-                }
-            }
-        }
+        //    if (shutickySettingIdx > -1)
+        //    {
+        //        try
+        //        {
+        //            //_shutickyWindows[shutickySettingIdx].SetShutickySetting(shutickySetting);
+        //        }
+        //        catch
+        //        {
+        //            return;
+        //        }
+        //    }
+        //}
         /// <summary>
         /// 付箋情報リストの読み込み
         /// </summary>
