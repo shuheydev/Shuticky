@@ -44,7 +44,7 @@ namespace 付箋アプリ
 
         //生成された付箋ウィンドウのリスト。
         private List<ShutickyWindow> _shutickyWindows = new List<ShutickyWindow>();
-        
+
 
         private double _positionIncrementX = 付箋アプリ.Properties.Settings.Default.PositionIncrementX;
         private double _positionIncrementY = 付箋アプリ.Properties.Settings.Default.PositionIncrementY;
@@ -203,7 +203,7 @@ namespace 付箋アプリ
 
             //リマインダータイマーをスタート
             _remindTimer = new DispatcherTimer();
-            _remindTimer.Interval = TimeSpan.FromMinutes(10);
+            _remindTimer.Interval = TimeSpan.FromMinutes(1);
             _remindTimer.Tick += RemindTimer_Tick;
             _remindTimer.Start();
         }
@@ -221,7 +221,7 @@ namespace 付箋アプリ
 
         private void RemindTimer_Tick(object sender, EventArgs e)
         {
-            ShowAllReminder();
+            ShowNearlyReminder();
         }
         private void ShutickyWindowMinimizeButtonClicked(object sender, EventArgs e)
         {
@@ -598,11 +598,39 @@ namespace 付箋アプリ
             {
                 allReminders.AddRange(window.Reminders);
             }
-            var remindList = string.Join("\r\n", allReminders.OrderBy(reminder => reminder.DateAndTime)
-                                                           .ThenBy(reminder => reminder.Title)
-                                                           .Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日hh時mm分")}：{reminder.Content.Replace(ReminderData._reminderTag, "")}"));
 
-            MessageBox.Show(remindList, "予定一覧", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            var notExpiredReminders = allReminders.Where(remind => DateTime.Now <= remind.DateAndTime)
+                                              .OrderBy(reminder => reminder.DateAndTime)
+                                              .ThenBy(reminder => reminder.Title);
+            var expiredReminders = allReminders.Where(remind => remind.DateAndTime < DateTime.Now)
+                                               .OrderBy(reminder => reminder.DateAndTime)
+                                               .ThenBy(reminder => reminder.Title);
+
+            var remindContents = "今後の予定\r\n" + string.Join("\r\n", notExpiredReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}")) + "\r\n";
+            remindContents += "期限切れ\r\n" + string.Join("\r\n", expiredReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}"));
+            MessageBox.Show(remindContents, "予定一覧", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+        }
+
+        private void ShowNearlyReminder()
+        {
+            //リマインダデータを取得し、それを時間順に並べる
+            List<ReminderData> allReminders = new List<ReminderData>();
+            foreach (var window in _shutickyWindows)
+            {
+                allReminders.AddRange(window.Reminders);
+            }
+
+            var nearlyReminders = allReminders.Where(remind => remind.DateAndTime - remind.RemindBefore <= DateTime.Now && DateTime.Now <= remind.DateAndTime)
+                                              .OrderBy(reminder => reminder.DateAndTime)
+                                              .ThenBy(reminder => reminder.Title);
+            var expiredReminders = allReminders.Where(remind => remind.DateAndTime < DateTime.Now)
+                                               .OrderBy(reminder => reminder.DateAndTime)
+                                               .ThenBy(reminder => reminder.Title);
+
+            var remindContents="もうすぐです\r\n"+ string.Join("\r\n", nearlyReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}"))+"\r\n";
+            remindContents += "期限切れ\r\n" + string.Join("\r\n", expiredReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}"));
+            MessageBox.Show(remindContents, "予定一覧", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+       
         }
 
         private void AddContextMenuItem_Trash(string trashedRtfFileNameWithoutExtension)

@@ -68,31 +68,93 @@ namespace 付箋アプリ
             var text_Body_Sentences = GetText_Body().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var sentence in text_Body_Sentences)
             {
-                var dateAndTimes_sentence = ReminderData.ReminderPattern.Select(pattern =>
+                var reminders_sentence = ReminderData.ReminderPattern.Select(pattern =>
                 {
                     //
                     var match = Regex.Match(sentence, pattern);
-                    if(match.Success)
+                    if (match.Success)
                     {
-                        var dateTimeString = $"{match.Groups["Month"].Value}月{match.Groups["Day"].Value}日";
+                        var reminder = new ReminderData()
+                        {
+                            Title = _shutickySetting.Title,
+                            Content = sentence.Replace(ReminderData._reminderTag,""),
+                            DateAndTime = DateTime.MinValue,
+                            Year = match.Groups["Year"].Value,
+                            Month = match.Groups["Month"].Value,
+                            Day = match.Groups["Day"].Value,
+                            Hour = match.Groups["Hour"].Value,
+                            Minute = match.Groups["Minute"].Value,
+                        };
+                        string dateTimeString = "";
+                        if(!string.IsNullOrWhiteSpace(reminder.Year))
+                        {
+                            dateTimeString += $"{reminder.Year}年";
+                            
+                        }
+                        else
+                        {
+                            reminder.IntervalType = RegularIntervalType.EveryYear;
+                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                        }
+                        if (!string.IsNullOrWhiteSpace(reminder.Month))
+                        {
+                            dateTimeString += $"{reminder.Month}月";
+                        }
+                        else
+                        {
+                            if (string.IsNullOrWhiteSpace(dateTimeString))
+                            {
+                                reminder.IntervalType = RegularIntervalType.EveryMonth;
+                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            }
+                        }
+                        if (!string.IsNullOrWhiteSpace(reminder.Day))
+                        {
+                            dateTimeString += $"{reminder.Day}日";
+                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                        }
+                        else
+                        {
+                            if (string.IsNullOrWhiteSpace(dateTimeString))
+                            {
+                                reminder.IntervalType = RegularIntervalType.EveryDay;
+                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            }
+                        }
+                        if (!string.IsNullOrWhiteSpace(reminder.Hour))
+                        {
+                            dateTimeString += $"{reminder.Hour}時";
+                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                        }
+                        else
+                        {
+                            if (string.IsNullOrWhiteSpace(dateTimeString))
+                            {
+                                reminder.IntervalType = RegularIntervalType.EveryHour;
+                                reminder.RemindBefore = new TimeSpan(0,1,0,0);
+                            }
+                        }
+                        if (!string.IsNullOrWhiteSpace(reminder.Minute))
+                        {
+                            dateTimeString += $"{reminder.Minute}分";
+                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                        }
+                        else
+                        {
+                            
+                        }
 
                         DateTime.TryParse(dateTimeString, out DateTime dateAndTime);
-                        return dateAndTime;
+                        reminder.DateAndTime = dateAndTime;
+
+                        return reminder;
                     }
 
-                    return DateTime.MinValue;
+                    return null;
 
-                }).Where(dateAndTime => dateAndTime != DateTime.MinValue);
+                }).Where(remind => remind != null);
 
-                foreach (var dateAndTime in dateAndTimes_sentence)
-                {
-                    result.Add(new ReminderData()
-                    {
-                        Title = "",
-                        DateAndTime = dateAndTime,
-                        Content = sentence,
-                    });
-                }
+                result.AddRange(reminders_sentence);
             }
 
             return result;
@@ -597,12 +659,23 @@ namespace 付箋アプリ
 
     public class ReminderData
     {
-        public static readonly string _reminderTag ="tt::";
+        public static readonly string _reminderTag = "tt::";
 
         public static readonly List<string> ReminderPattern = new List<string>()
         {
-            _reminderTag+ @"(?<Month>\d+?)月(?<Day>\d+?)日",
-            _reminderTag+@"(?<Month>\d\d)(?<Day>\d\d)",
+            _reminderTag+ @"(?<Month>\d+?)月(?<Day>\d+?)日[^\d]",//毎年定期月日
+            _reminderTag+@"(?<Month>\d\d)(?<Day>\d\d)",//毎年定期月日
+            _reminderTag+@"(?<Hour>\d+?):(?<Minute>\d+?)",//毎日定時分
+            _reminderTag+@"(?<Hour>\d+?)時(?<Minute>\d+?)分",//毎日定時分
+            _reminderTag+@"(?<Hour>\d+?)時[^\d]",//毎日定時
+            _reminderTag+@"(?<Month>\d+?)月(?<Day>\d+?)日(?<Hour>\d+?):(?<Minute>\d+?)",//毎年月日時
+            _reminderTag+ @"(?<Month>\d+?)月(?<Day>\d+?)日(?<Hour>\d+?)時(?<Minute>\d+?)分",//毎年月日時
+            _reminderTag+ @"(?<Month>\d+?)月(?<Day>\d+?)日(?<Hour>\d+?)時[^\d]",//毎年月日時
+            _reminderTag+@"(?<Day>\d+?)日(?<Hour>\d+?):(?<Minute>\d+?)",//毎月定期日時分
+            _reminderTag+@"(?<Day>\d+?)日(?<Hour>\d+?)時(?<Minute>\d+?)分",//毎月定期日時分
+            _reminderTag+@"(?<Day>\d+?)日(?<Hour>\d+?)時[^\d]",//毎月定期日時
+            _reminderTag+@"(?<Day>\d+?)日[^\d]",//毎月定期日
+            _reminderTag+@"[^時](?<Minute>\d+?)分",//毎時定期分
         };
 
         public string Title
@@ -611,11 +684,32 @@ namespace 付箋アプリ
         { get; set; } = "";
         public DateTime DateAndTime
         { get; set; }
-        public DateTime RemindBefore
+        public string Year
         { get; set; }
+        public string Month
+        { get; set; }
+        public string Day
+        { get; set; }
+        public string Hour
+        { get; set; }
+        public string Minute
+        { get; set; }
+        public TimeSpan RemindBefore
+        { get; set; }
+        public RegularIntervalType IntervalType
+        { get; set; } = RegularIntervalType.None;
 
         public ReminderData()
         {
         }
+    }
+
+    public enum RegularIntervalType
+    {
+        EveryYear,
+        EveryMonth,
+        EveryDay,
+        EveryHour,
+        None,
     }
 }
