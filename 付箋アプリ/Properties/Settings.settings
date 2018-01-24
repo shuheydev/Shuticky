@@ -32,5 +32,8 @@
     <Setting Name="OnedriveCommonApplicationFolderName" Type="System.String" Scope="User">
       <Value Profile="(Default)">アプリ</Value>
     </Setting>
+    <Setting Name="AppTrashcanName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Trash</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

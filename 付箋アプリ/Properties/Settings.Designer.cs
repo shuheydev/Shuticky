@@ -142,5 +142,17 @@ namespace 付箋アプリ.Properties {
                 this["OnedriveCommonApplicationFolderName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Trash")]
+        public string AppTrashcanName {
+            get {
+                return ((string)(this["AppTrashcanName"]));
+            }
+            set {
+                this["AppTrashcanName"] = value;
+            }
+        }
     }
 }

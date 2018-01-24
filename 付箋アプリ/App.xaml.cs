@@ -9,6 +9,9 @@ using System.IO;
 using System.Threading;
 using System.Xml.Serialization;
 using System.Reflection;
+using System.Windows.Input;
+using System.Windows.Threading;
+using System.Text.RegularExpressions;
 
 
 namespace 付箋アプリ
@@ -18,6 +21,9 @@ namespace 付箋アプリ
     /// </summary>
     public partial class App : Application
     {
+        private DispatcherTimer _remindTimer;
+
+
         /// <summary>
         /// タスクトレイに表示するアイコン
         /// </summary>
@@ -31,9 +37,14 @@ namespace 付箋アプリ
         private readonly string _shutickySettingFileName = 付箋アプリ.Properties.Settings.Default.SettingFileName;
         private readonly string _defaultShutickyName = 付箋アプリ.Properties.Settings.Default.DefaultShutickyName;
         private readonly string _onedriveCommonApplicationFolderName = 付箋アプリ.Properties.Settings.Default.OnedriveCommonApplicationFolderName;
+        private readonly string _appTrashcanFolderName = 付箋アプリ.Properties.Settings.Default.AppTrashcanName;
         private string _helpFilePath = "";
+        private string _shutickyTrashcanFolderPath = "";
 
+
+        //生成された付箋ウィンドウのリスト。
         private List<ShutickyWindow> _shutickyWindows = new List<ShutickyWindow>();
+        
 
         private double _positionIncrementX = 付箋アプリ.Properties.Settings.Default.PositionIncrementX;
         private double _positionIncrementY = 付箋アプリ.Properties.Settings.Default.PositionIncrementY;
@@ -42,6 +53,8 @@ namespace 付箋アプリ
         private double _defaultWidth = 付箋アプリ.Properties.Settings.Default.DefaultWidth;
         private double _defaultHeight = 付箋アプリ.Properties.Settings.Default.DefaultHeight;
 
+
+        #region イベント
         protected override void OnStartup(StartupEventArgs e)
         {
             //二重起動防止
@@ -63,6 +76,7 @@ namespace 付箋アプリ
             this._notifyIcon.ContextMenuItem_ShowAll_Clicked += ContextMenuItem_ShowAll_Clicked;
             this._notifyIcon.ContextMenuItem_MinimizeAll_Clicked += ContextMenuItem_MinimizeAll_Clicked;
             this._notifyIcon.ContextMenuItem_Help_Clicked += ContextMenuItem_Help_Clicked;
+            this._notifyIcon.ContextMenuItem_ClearTrash_Clicked += ContextMenuItem_ClearTrash_Clicked;
 
             //インストール先のフォルダにヘルプファイル(html)を配置する
             var asm = Assembly.GetEntryAssembly();
@@ -71,6 +85,8 @@ namespace 付箋アプリ
             _helpFilePath = Path.Combine(appExeFolderPath, "help.html");
             File.WriteAllText(_helpFilePath, 付箋アプリ.Properties.Resources.Help);
 
+
+            //アプリケーション用のフォルダを作成
             try
             {
                 //OneDriveのフォルダのパスを取得
@@ -84,15 +100,22 @@ namespace 付箋アプリ
                 //Shuticky用のフォルダを作成。
                 if (string.IsNullOrEmpty(oneDrivePath) == false)
                 {
-                    _shutickyNoteApplicationFolderPath = Path.Combine(string.Format(oneDrivePath), _onedriveCommonApplicationFolderName, _applicationName);
-                    Directory.CreateDirectory(_shutickyNoteApplicationFolderPath);
+                    _shutickyNoteApplicationFolderPath = Path.Combine(oneDrivePath, _onedriveCommonApplicationFolderName, _applicationName);
                 }
             }
             catch (Exception)
             {
                 //OneDriveフォルダにフォルダを作成できなかった場合、マイドキュメントにフォルダを作る。
                 _shutickyNoteApplicationFolderPath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), _applicationName);
+            }
+            finally
+            {
+                //Shuticky用のフォルダを作成。
                 Directory.CreateDirectory(_shutickyNoteApplicationFolderPath);
+
+                //アプリ用のゴミ箱フォルダを作成
+                _shutickyTrashcanFolderPath = Path.Combine(_shutickyNoteApplicationFolderPath, _appTrashcanFolderName);
+                Directory.CreateDirectory(_shutickyTrashcanFolderPath);
             }
 
             //設定ファイルのパスを取得
@@ -118,6 +141,7 @@ namespace 付箋アプリ
                 shutickySettings = new List<ShutickySetting>();
             }
 
+
             //RTFファイルのみがフォルダ内に置かれた場合、
             //それらが読み込まれるようにする
             //付箋データファイル（つまりrtfファイル）のパスの一覧を取得
@@ -139,34 +163,25 @@ namespace 付箋アプリ
                 }
             }
 
+            //TODO:
+            //アプリのゴミ箱(Trashフォルダ)内のRTFファイルのリストを作成
+            //コンテキストメニューのゴミ箱項目内に追加する
+            var trashedRtfFilePaths = Directory.GetFiles(_shutickyTrashcanFolderPath, "*.rtf", SearchOption.TopDirectoryOnly);
+            foreach (var trashedRtfFilePath in trashedRtfFilePaths)
+            {
+                var trashedShutickyTitle = Path.GetFileNameWithoutExtension(trashedRtfFilePath);
+                AddContextMenuItem_Trash(trashedShutickyTitle);
+            }
+
             //付箋ウィンドウの生成
-            if (shutickySettings.Count > 0)//既存の付箋が１つ以上あった場合。付箋ウィンドウを開く。
+            if (shutickySettings.Count > 0)//既存の付箋が１つ以上あった場合。すでにある付箋を開く。
             {
                 foreach (var shutickySetting in shutickySettings)
                 {
                     try
                     {
-                        //ウィンドウの座標が画面外の場合がある。
-                        //マルチウィンドウで終了し、シングルウィンドウで起動したときなど。
-                        //この場合は、座標を修正する。
-                        if (shutickySetting.Position_X + 100 > SystemParameters.VirtualScreenWidth)
-                        {
-                            shutickySetting.Position_X = shutickySetting.Position_X % SystemParameters.VirtualScreenWidth;
-                        }
-
-                        if (shutickySetting.Position_Y + 100 > SystemParameters.VirtualScreenHeight)
-                        {
-                            shutickySetting.Position_Y = shutickySetting.Position_Y % SystemParameters.VirtualScreenHeight;
-                        }
-
-                        //付箋ウィンドウをインスタンス化
-                        var shutickyWindow = new ShutickyWindow(shutickySetting);
-
-                        //イベントハンドラを登録
-                        AddEventHandlersToShutickyWindow(shutickyWindow);
-
-                        //付箋ウィンドウのリストに登録
-                        _shutickyWindows.Add(shutickyWindow);
+                        //既存の付箋の表示
+                        AddExistShutickyWindow(shutickySetting);
                     }
                     catch
                     {
@@ -176,12 +191,22 @@ namespace 付箋アプリ
             }
             else//なければ空の付箋ウィンドウを開く
             {
-                var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle()}.rtf");
+                var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle(_defaultShutickyName)}.rtf");
                 var newShutickySetting = new ShutickySetting(newRtfPath);
                 AddNewShutickyWindow(newShutickySetting);
             }
-        }
 
+
+
+            //すべてのリマインダを表示
+            ShowAllReminder();
+
+            //リマインダータイマーをスタート
+            _remindTimer = new DispatcherTimer();
+            _remindTimer.Interval = TimeSpan.FromMinutes(10);
+            _remindTimer.Tick += RemindTimer_Tick;
+            _remindTimer.Start();
+        }
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
@@ -194,58 +219,10 @@ namespace 付箋アプリ
             }
         }
 
-        private string GenerateNewTitle()
+        private void RemindTimer_Tick(object sender, EventArgs e)
         {
-            var newShutickyName = _defaultShutickyName;
-
-            try
-            {
-                //デフォルト名のファイルが既に存在する場合は、
-                //新しいファイル名を生成する。
-                if (_shutickyWindows.FindIndex(x => x.GetShutickySetting().Title == _defaultShutickyName) > -1)
-                {
-                    //既にある付箋名と被らないようにする
-                    int namePostfix = 1;
-                    while (true)
-                    {
-                        if (_shutickyWindows.FindIndex(x => x.GetShutickySetting().Title == $"{_defaultShutickyName}_{namePostfix}") > -1)
-                        {
-                            namePostfix++;
-                        }
-                        else
-                        {
-                            newShutickyName = $"{_defaultShutickyName}_{namePostfix}";
-
-                            break;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                newShutickyName = _defaultShutickyName;
-            }
-
-            return newShutickyName;
+            ShowAllReminder();
         }
-
-        private void AddEventHandlersToShutickyWindow(ShutickyWindow shutickyWindow)
-        {
-            if (shutickyWindow == null)
-            {
-                return;
-            }
-
-            shutickyWindow.Closed += ShutickyWindowClosed;
-            shutickyWindow.Deactivated += ShutickyWindowDeactivated;
-            shutickyWindow.DeleteButtonClicked += ShutickyWindowDeleteButtonClicked;
-            shutickyWindow.TitleLostFocus += ShutickyWindowTitleLostFocus;
-            shutickyWindow.SaveButtonClicked += ShutickyWindowSaveButtonClicked;
-            shutickyWindow.CloseButtonClicked += ShutickyWindowCloseButtonClicked;
-            shutickyWindow.NewShutickyButtonClicked += ShutickyWindowNewButtonClicked;
-            shutickyWindow.MinimizeButtonClicked += ShutickyWindowMinimizeButtonClicked;
-        }
-
         private void ShutickyWindowMinimizeButtonClicked(object sender, EventArgs e)
         {
             var senderWindow = sender as ShutickyWindow;
@@ -254,7 +231,7 @@ namespace 付箋アプリ
         }
         private void ShutickyWindowNewButtonClicked(object sender, EventArgs e)
         {
-            var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle()}.rtf");
+            var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle(_defaultShutickyName)}.rtf");
             var newShutickySetting = new ShutickySetting(newRtfPath);
 
             //新規付箋ボタンが押されたWindowから少しずらした位置に表示させる
@@ -272,46 +249,96 @@ namespace 付箋アプリ
         private void ShutickyWindowDeactivated(object sender, EventArgs e)
         {
             var senderWindow = sender as ShutickyWindow;
-            var senderSetting = senderWindow.GetShutickySetting();
-
-            //現在の設定内容でセッティングリストの該当データを更新
-            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
 
-            senderWindow.SaveRTF();
+
+            //デリートボタンが押されてWindowが閉じられた場合は保存は行わない。
+            if (!_isShutickyDeleting)
+            {
+                senderWindow.SaveRTF();
+            }
+            //付箋削除中フラグをfalseに。
+            _isShutickyDeleting = false;
         }
+
+        private bool _isShutickyDeleting = false;
         private void ShutickyWindowDeleteButtonClicked(object sender, EventArgs e)
         {
-            var senderWindow = sender as ShutickyWindow;
-            var senderSetting = senderWindow.GetShutickySetting();
+            //デリート中フラグを立てる。
+            //削除された後にShutickyWindowがDeactivatedの時に保存されないようにするため。
+            _isShutickyDeleting = true;
 
-            //RTFファイルを削除
-            //新規作成されたShutickyウィンドウが、RTFファイルが作成される前に閉じられることもある。
-            //ファイルの存在確認を行う。
-            if (File.Exists(senderSetting.FilePath))
+            try
             {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(senderSetting.FilePath, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                var senderWindow = sender as ShutickyWindow;
+                //最終状態を保存
+                senderWindow.SaveRTF();
+
+                var senderSetting = senderWindow.GetShutickySetting();
+
+                //Ctrlを押しながらクリックされた場合、直接Windowsのゴミ箱に送る
+                if ((Keyboard.Modifiers & ModifierKeys.Control) > 0)
+                {
+                    //OSのゴミ箱へ移動。
+                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(senderSetting.FilePath,
+                                                                       Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                                                                       Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin
+                                                                       );
+                }
+                else
+                {
+                    var trashedFileName = Path.GetFileName(senderSetting.FilePath);
+                    var trashedFilePath = Path.Combine(_shutickyTrashcanFolderPath, trashedFileName);
+                    var trashedTitle = Path.GetFileNameWithoutExtension(senderSetting.FilePath);
+
+                    //RTFファイルをアプリのTrashフォルダに移動する。
+                    //ゴミ箱ではない。
+                    //ファイルの存在確認を行う。
+                    if (File.Exists(trashedFilePath))
+                    {
+                        //アプリのゴミ箱内に同名のファイルがある場合はファイル名を変える必要がある。
+                        var newTrashedTitle = GenerateNewTrashedTitle(trashedTitle);// "";
+
+                        trashedFileName = $"{newTrashedTitle}.rtf";
+                        trashedFilePath = Path.Combine(_shutickyTrashcanFolderPath, trashedFileName);
+                        trashedTitle = Path.GetFileNameWithoutExtension(trashedFilePath);
+                    }
+
+                    File.Move(senderSetting.FilePath, trashedFilePath);//Trashフォルダに移動する
+
+                    AddContextMenuItem_Trash(trashedTitle);
+                }
+
+
+
+
+
+                //リストから消す
+                var shutickySettingIdx = _shutickyWindows.FindIndex(x => x.GetShutickySetting().FilePath == senderSetting.FilePath);
+                if (shutickySettingIdx > -1)
+                {
+                    _shutickyWindows.RemoveAt(shutickySettingIdx);
+                }
+
+                //セッティングリストを書き込み
+                WriteShutickySettingListXML(_shutickySettingFilePath);
+
+                senderWindow.Close();
+            }
+            catch
+            {
+                _isShutickyDeleting = false;
             }
 
-            //リストから消す
-            var shutickySettingIdx = _shutickyWindows.FindIndex(x => x.GetShutickySetting().FilePath == senderSetting.FilePath);
-            if (shutickySettingIdx > -1)
-            {
-                _shutickyWindows.RemoveAt(shutickySettingIdx);
-            }
-
-            //セッティングリストを書き込み
-            WriteShutickySettingListXML(_shutickySettingFilePath);
-
-            senderWindow.Close();
         }
+
+
         private void ShutickyWindowSaveButtonClicked(object sender, EventArgs e)
         {
             var senderWindow = sender as ShutickyWindow;
             var senderSetting = senderWindow.GetShutickySetting();
-            //UpdateShutickyWindows(senderSetting);
 
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
@@ -369,10 +396,6 @@ namespace 付箋アプリ
             //付箋WindowのTitleを変更。
             senderWindow.Title = senderWindow.textBox_Title.Text;
 
-
-            //現在の設定内容でセッティングリストの該当データを更新
-            //UpdateShutickyWindows(senderSetting);
-
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
 
@@ -386,9 +409,6 @@ namespace 付箋アプリ
             //Windowを非表示に
             senderWindow.SetDisplayStatus(DisplayStatus.Hidden);
 
-            //現在の設定内容でセッティングリストの該当データを更新
-            //UpdateShutickyWindows(senderSetting);
-
             //セッティングリストを書き込み
             WriteShutickySettingListXML(_shutickySettingFilePath);
 
@@ -398,8 +418,281 @@ namespace 付箋アプリ
             senderWindow.Close();
         }
 
+        private void ContextMenuItem_New_Clicked(object sender, EventArgs e)
+        {
+            var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle(_defaultShutickyName)}.rtf");
+            var newShutickySetting = new ShutickySetting(newRtfPath);
+
+            AddNewShutickyWindow(newShutickySetting);
+        }
+        /// <summary>
+        /// 既存の付箋Windowの座標と重ならない座標を返す
+        /// </summary>
+        /// <param name="baseX"></param>
+        /// <param name="baseY"></param>
+        /// <returns></returns>
+        private (double x, double y) GetNewPositionTuple(double baseX, double baseY)
+        {
+            double newX = baseX;
+            double newY = baseY;
+
+            try
+            {
+                foreach (var shutickyWindow in _shutickyWindows)
+                {
+                    var shutickySetting = shutickyWindow.GetShutickySetting();
+                    if (newX == shutickySetting.Position_X || newX == shutickySetting.Position_Y)
+                    {
+                        newX += _positionIncrementX;
+                        newY += _positionIncrementY;
+
+                        //画面外にはみ出さないようにする。
+                        if (newX + _defaultWidth + 50 > SystemParameters.VirtualScreenWidth)//マルチモニター全体の幅
+                        {
+                            newX = _defaultPositionX;
+                        }
+                        if (newY + _defaultHeight + 50 > SystemParameters.VirtualScreenHeight)//マルチモニター全体の高さ。
+                        {
+                            newY = _defaultPositionY;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                newX = baseX;
+                newY = baseY;
+            }
+
+            return (newX, newY);
+        }
+        /// <summary>
+        /// 付箋が画面外にある場合は現在のウィンドウ内に収まるような座標を返す
+        /// </summary>
+        /// <param name="baseX"></param>
+        /// <param name="baseY"></param>
+        /// <returns></returns>
+        private (double x, double y) AdjustWindowPositionTuple(double baseX, double baseY)
+        {
+            double newX = baseX;
+            double newY = baseY;
+
+            //ウィンドウの座標が画面外の場合がある。
+            //マルチウィンドウで終了し、シングルウィンドウで起動したときなど。
+            //この場合は、座標を修正する。
+            if (baseX + 100 > SystemParameters.VirtualScreenWidth)
+            {
+                newX = baseX % SystemParameters.VirtualScreenWidth;
+            }
+            if (baseY + 100 > SystemParameters.VirtualScreenHeight)
+            {
+                newY = baseY % SystemParameters.VirtualScreenHeight;
+            }
+
+            return (newX, newY);
+        }
+        private void ContextMenuItem_Exit_Clicked(object sender, EventArgs e)
+        {
+            this.Shutdown();
+        }
+        private void ContextMenuItem_ShowAll_Clicked(object sender, EventArgs e)
+        {
+            foreach (var shutickyWindow in _shutickyWindows)
+            {
+                try
+                {
+                    shutickyWindow.SetDisplayStatus(DisplayStatus.Visible);
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+        }
+        private void ContextMenuItem_MinimizeAll_Clicked(object sender, EventArgs e)
+        {
+            foreach (var shutickyWindow in _shutickyWindows)
+            {
+                try
+                {
+                    shutickyWindow.SetDisplayStatus(DisplayStatus.Minimize);
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+        }
+        private void ContextMenuItem_Help_Clicked(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(_helpFilePath);
+        }
+        private void ContextMenuItem_TrashedRtf_Clicked(object sender, EventArgs e)
+        {
+            var senderContextMenu = (System.Windows.Forms.ToolStripMenuItem)sender;
+            var trashedRtfFileName = $"{senderContextMenu.Text}.rtf";
+            var trashedRtfFilePath = Path.Combine(_shutickyTrashcanFolderPath, trashedRtfFileName);
+            var rtfFileName = $"{GenerateNewTitle(senderContextMenu.Text)}.rtf";
+            var rtfFilePath = Path.Combine(_shutickyNoteApplicationFolderPath, rtfFileName);
+
+            File.Move(trashedRtfFilePath, rtfFilePath);//アプリのゴミ箱からRTFを戻す。
+            //そして開く。
+            var shutickySetting = new ShutickySetting(rtfFilePath);
+            AddNewShutickyWindow(shutickySetting);
+
+            //コンテキストメニューから削除する。
+            _notifyIcon.toolStripMenuItem_Trash.DropDownItems.Remove(senderContextMenu);
+        }
+        /// <summary>
+        /// アプリのゴミ箱内のファイルをすべて削除する。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuItem_ClearTrash_Clicked(object sender, EventArgs e)
+        {
+
+            //アプリのゴミ箱内のファイルのパスを取得
+            var trashedFilePaths = Directory.GetFiles(_shutickyTrashcanFolderPath, "*.rtf", SearchOption.TopDirectoryOnly).ToList();
+
+            if (trashedFilePaths.Count == 0)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show("ShutickyNoteのゴミ箱内の付箋を削除します。\r\nよろしいですか?\r\n(RTFファイルはWindowsのゴミ箱に移動されます。)",
+                                "ゴミ箱を空にする",
+                                MessageBoxButton.OKCancel,
+                                MessageBoxImage.Question);
+            if (result == MessageBoxResult.OK)
+            {
+                foreach (var trashedFilePath in trashedFilePaths)
+                {
+                    try
+                    {
+                        //OSのゴミ箱へ移動。
+                        Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(trashedFilePath,
+                                                                           Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                                                                           Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin
+                                                                           );
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                //コンテキストメニューのゴミ箱を空にする。
+                _notifyIcon.toolStripMenuItem_Trash.DropDownItems.Clear();
+            }
+
+        }
+        #endregion
 
 
+
+        private void ShowAllReminder()
+        {
+            //リマインダデータを取得し、それを時間順に並べる
+            List<ReminderData> allReminders = new List<ReminderData>();
+            foreach (var window in _shutickyWindows)
+            {
+                allReminders.AddRange(window.Reminders);
+            }
+            var remindList = string.Join("\r\n", allReminders.OrderBy(reminder => reminder.DateAndTime)
+                                                           .ThenBy(reminder => reminder.Title)
+                                                           .Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日hh時mm分")}：{reminder.Content.Replace(ReminderData._reminderTag, "")}"));
+
+            MessageBox.Show(remindList, "予定一覧", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+        }
+
+        private void AddContextMenuItem_Trash(string trashedRtfFileNameWithoutExtension)
+        {
+            var toolstripMenuItem_trashedRtf = new System.Windows.Forms.ToolStripMenuItem(trashedRtfFileNameWithoutExtension);
+            toolstripMenuItem_trashedRtf.Click += ContextMenuItem_TrashedRtf_Clicked;
+            _notifyIcon.toolStripMenuItem_Trash.DropDownItems.Add(toolstripMenuItem_trashedRtf);
+        }
+        private string GenerateNewTitle(string defaultTitle)
+        {
+            var newShutickyTitle = defaultTitle;
+
+            try
+            {
+                //デフォルト名のファイルが既に存在する場合は、
+                //新しいファイル名を生成する。
+                //if (_shutickyWindows.FindIndex(x => x.GetShutickySetting().Title == _defaultShutickyName) > -1)
+                //{
+                //既にある付箋名と被らないようにする
+                int namePostfix = 1;
+                while (true)
+                {
+                    if (_shutickyWindows.FindIndex(x => x.GetShutickySetting().Title == $"{defaultTitle}_{namePostfix}") > -1)
+                    {
+                        namePostfix++;
+                    }
+                    else
+                    {
+                        newShutickyTitle = $"{defaultTitle}_{namePostfix}";
+
+                        break;
+                    }
+                }
+                //}
+            }
+            catch
+            {
+                newShutickyTitle = _defaultShutickyName;
+            }
+
+            return newShutickyTitle;
+        }
+        private string GenerateNewTrashedTitle(string trashedTitle)
+        {
+            string newTrashedTitle = "";
+            var trashedShutickyTitles = Directory.GetFiles(_shutickyTrashcanFolderPath, "*.rtf")
+                                                    .Select(file => Path.GetFileNameWithoutExtension(file))
+                                                    .ToList();
+
+            try
+            {
+                int namePostfix = 1;
+                while (true)
+                {
+                    if (trashedShutickyTitles.FindIndex(title => title == $"{trashedTitle}_{namePostfix}") > -1)
+                    {
+                        namePostfix++;
+                    }
+                    else
+                    {
+                        newTrashedTitle = $"{trashedTitle}_{namePostfix}";
+
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                newTrashedTitle = $"{trashedTitle}_{DateTime.Now.ToString("yyyyMMddhhmmss")}";
+            }
+
+            return newTrashedTitle;
+        }
+
+        private void AddEventHandlersToShutickyWindow(ShutickyWindow shutickyWindow)
+        {
+            if (shutickyWindow == null)
+            {
+                return;
+            }
+
+            shutickyWindow.Closed += ShutickyWindowClosed;
+            shutickyWindow.Deactivated += ShutickyWindowDeactivated;
+            shutickyWindow.DeleteButtonClicked += ShutickyWindowDeleteButtonClicked;
+            shutickyWindow.TitleLostFocus += ShutickyWindowTitleLostFocus;
+            shutickyWindow.SaveButtonClicked += ShutickyWindowSaveButtonClicked;
+            shutickyWindow.CloseButtonClicked += ShutickyWindowCloseButtonClicked;
+            shutickyWindow.NewShutickyButtonClicked += ShutickyWindowNewButtonClicked;
+            shutickyWindow.MinimizeButtonClicked += ShutickyWindowMinimizeButtonClicked;
+        }
         private void AddNewShutickyWindow(ShutickySetting shutickySetting)
         {
             if (shutickySetting == null)
@@ -414,8 +707,9 @@ namespace 付箋アプリ
             shutickySetting.Position_Y = newPos.y;
 
             var newShutickyWindow = new ShutickyWindow(shutickySetting);
+            //イベントハンドラをセット
             AddEventHandlersToShutickyWindow(newShutickyWindow);
-
+            //付箋ウィンドウのリストに登録
             _shutickyWindows.Add(newShutickyWindow);
 
             //セッティングファイルを書き込み
@@ -424,22 +718,29 @@ namespace 付箋アプリ
             //RTFを作成。
             newShutickyWindow.SaveRTF();
         }
-        //private void UpdateShutickyWindows(ShutickySetting shutickySetting)
-        //{
-        //    var shutickySettingIdx = _shutickyWindows.FindIndex(x => x.GetShutickySetting().FilePath == shutickySetting.FilePath);
+        private void AddExistShutickyWindow(ShutickySetting shutickySetting)
+        {
+            if (shutickySetting == null)
+            {
+                return;
+            }
 
-        //    if (shutickySettingIdx > -1)
-        //    {
-        //        try
-        //        {
-        //            //_shutickyWindows[shutickySettingIdx].SetShutickySetting(shutickySetting);
-        //        }
-        //        catch
-        //        {
-        //            return;
-        //        }
-        //    }
-        //}
+            //付箋が画面外にある場合は現在のウィンドウ内に収まるように調整
+            var newPos = AdjustWindowPositionTuple(shutickySetting.Position_X, shutickySetting.Position_Y);
+            shutickySetting.Position_X = newPos.x;
+            shutickySetting.Position_Y = newPos.y;
+
+            //付箋ウィンドウをインスタンス化
+            var shutickyWindow = new ShutickyWindow(shutickySetting);
+            //イベントハンドラを登録
+            AddEventHandlersToShutickyWindow(shutickyWindow);
+            //付箋ウィンドウのリストに登録
+            _shutickyWindows.Add(shutickyWindow);
+
+            //セッティングファイルを書き込み
+            WriteShutickySettingListXML(_shutickySettingFilePath);
+        }
+
         /// <summary>
         /// 付箋情報リストの読み込み
         /// </summary>
@@ -455,9 +756,9 @@ namespace 付箋アプリ
             }
 
             //XmlSerializerオブジェクトを作成
-            XmlSerializer serializer = null;// new System.Xml.Serialization.XmlSerializer(typeof(List<ShutickySetting>));
+            XmlSerializer serializer = null;
             //読み込むファイルを開く
-            StreamReader strmReader = null;// new StreamReader(_filePath, new System.Text.UTF8Encoding(false));
+            StreamReader strmReader = null;
             try
             {
                 serializer = new XmlSerializer(typeof(List<ShutickySetting>));
@@ -522,86 +823,5 @@ namespace 付箋アプリ
             }
         }
 
-
-
-        private void ContextMenuItem_New_Clicked(object sender, EventArgs e)
-        {
-            var newRtfPath = Path.Combine(_shutickyNoteApplicationFolderPath, $"{GenerateNewTitle()}.rtf");
-            var newShutickySetting = new ShutickySetting(newRtfPath);
-
-            AddNewShutickyWindow(newShutickySetting);
-        }
-        private (double x, double y) GetNewPositionTuple(double baseX, double baseY)
-        {
-            double newX = baseX;
-            double newY = baseY;
-
-            try
-            {
-                foreach (var shutickyWindow in _shutickyWindows)
-                {
-                    var shutickySetting = shutickyWindow.GetShutickySetting();
-                    if (newX == shutickySetting.Position_X || newX == shutickySetting.Position_Y)
-                    {
-                        newX += _positionIncrementX;
-                        newY += _positionIncrementY;
-
-                        //画面外にはみ出さないようにする。
-                        if (newX + _defaultWidth + 50 > SystemParameters.VirtualScreenWidth)//マルチモニター全体の幅
-                        {
-                            newX = _defaultPositionX;
-                        }
-                        if (newY + _defaultHeight + 50 > SystemParameters.VirtualScreenHeight)//マルチモニター全体の高さ。
-                        {
-                            newY = _defaultPositionY;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                newX = baseX;
-                newY = baseY;
-            }
-
-            return (newX, newY);
-        }
-
-        private void ContextMenuItem_Exit_Clicked(object sender, EventArgs e)
-        {
-            this.Shutdown();
-        }
-        private void ContextMenuItem_ShowAll_Clicked(object sender, EventArgs e)
-        {
-            foreach (var shutickyWindow in _shutickyWindows)
-            {
-                try
-                {
-                    shutickyWindow.SetDisplayStatus(DisplayStatus.Visible);
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-        }
-        private void ContextMenuItem_MinimizeAll_Clicked(object sender, EventArgs e)
-        {
-            foreach (var shutickyWindow in _shutickyWindows)
-            {
-                try
-                {
-                    shutickyWindow.SetDisplayStatus(DisplayStatus.Minimize);
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-        }
-        private void ContextMenuItem_Help_Clicked(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start(_helpFilePath);
-        }
     }
 }

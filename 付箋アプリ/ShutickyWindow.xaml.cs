@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
+using System.Text.RegularExpressions;
 
 
 namespace 付箋アプリ
@@ -21,10 +22,11 @@ namespace 付箋アプリ
     public partial class ShutickyWindow : Window
     {
         private ShutickySetting _shutickySetting;
+        //private List<ReminderData> _reminders;
+        public List<ReminderData> Reminders
+        { get; private set; }
 
-        private bool _deleted = false;
-
-        public static readonly List<BackGroundColorSet> PresetBackGroundColorSet = new List<BackGroundColorSet>()
+        private static readonly List<BackGroundColorSet> _presetBackGroundColorSet = new List<BackGroundColorSet>()
         {
             new BackGroundColorSet{TitleColor="#FFFFDF67",BodyColor="#FFFDF5D6"},
             new BackGroundColorSet{TitleColor="#FFFCA8A8",BodyColor="#FFFDD6D6"},
@@ -56,48 +58,53 @@ namespace 付箋アプリ
 
             SetDisplayStatus(_shutickySetting.DisplayStatus);
 
+            this.Reminders = ExtractRemindDatas();
         }
 
-        /// <summary>
-        /// 付箋データの読み込み（rtf）
-        /// </summary>
-        private void LoadRTF(string filePath)
+        private List<ReminderData> ExtractRemindDatas()
         {
-            if (!File.Exists(filePath))
+            var result = new List<ReminderData>();
+
+            var text_Body_Sentences = GetText_Body().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var sentence in text_Body_Sentences)
             {
-                return;
+                var dateAndTimes_sentence = ReminderData.ReminderPattern.Select(pattern =>
+                {
+                    //
+                    var match = Regex.Match(sentence, pattern);
+                    if(match.Success)
+                    {
+                        var dateTimeString = $"{match.Groups["Month"].Value}月{match.Groups["Day"].Value}日";
+
+                        DateTime.TryParse(dateTimeString, out DateTime dateAndTime);
+                        return dateAndTime;
+                    }
+
+                    return DateTime.MinValue;
+
+                }).Where(dateAndTime => dateAndTime != DateTime.MinValue);
+
+                foreach (var dateAndTime in dateAndTimes_sentence)
+                {
+                    result.Add(new ReminderData()
+                    {
+                        Title = "",
+                        DateAndTime = dateAndTime,
+                        Content = sentence,
+                    });
+                }
             }
 
-            textBox_Title.Text = Path.GetFileNameWithoutExtension(filePath);
-
-            TextRange range_Body;
-            range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
-
-            using (FileStream fStream = new FileStream(filePath, FileMode.OpenOrCreate))
-            {
-                range_Body.Load(fStream, DataFormats.Rtf);
-            }
+            return result;
         }
-        /// <summary>
-        /// 付箋データの書き込み(rtf)
-        /// </summary>
-        public void SaveRTF()
+
+        private string GetText_Body()
         {
-            //Deleteボタンが押されてShutickyウィンドウが閉じられた時に、
-            //RTFが保存されないようにする。
-            if (this._deleted == true)
-            {
-                return;
-            }
-
-            TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
-
-            using (FileStream fStream = new FileStream(_shutickySetting.FilePath, FileMode.Create))
-            {
-                range_Body.Save(fStream, DataFormats.Rtf);
-            }
+            return new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd).Text;
         }
 
+
+        #region イベント、イベントハンドラ
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
@@ -167,11 +174,6 @@ namespace 付箋アプリ
         public event EventHandler DeleteButtonClicked;
         private void Button_Delete_Click(object sender, RoutedEventArgs e)
         {
-            //削除フラグをOnにする。
-            //削除ボタンを押して閉じられる時に、
-            //Deactivatedイベントで保存が行われないように。
-            this._deleted = true;
-
             DeleteButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
@@ -197,42 +199,6 @@ namespace 付箋アプリ
         private void Button_Close_Click(object sender, RoutedEventArgs e)
         {
             CloseButtonClicked?.Invoke(this, EventArgs.Empty);
-        }
-
-
-        /// <summary>
-        /// 内部付箋情報リストを更新
-        /// </summary>
-        public ShutickySetting GetShutickySetting()
-        {
-            //状態を更新してから
-            _shutickySetting.Position_X = this.Left;
-            _shutickySetting.Position_Y = this.Top;
-            //ただし幅と高さは、最小化されている場合は更新しない
-            if (_shutickySetting.DisplayStatus != DisplayStatus.Minimize)
-            {
-                _shutickySetting.Size_Height = this.Height;
-                _shutickySetting.Size_Width = this.Width;
-            }
-
-            _shutickySetting.IsPinned = this.Topmost;
-
-            return _shutickySetting;
-        }
-        public void SetShutickySetting(ShutickySetting shutickySetting)
-        {
-            if (shutickySetting == null)
-            {
-                return;
-            }
-
-            _shutickySetting = shutickySetting;
-
-            this.Left = _shutickySetting.Position_X;
-            this.Top = _shutickySetting.Position_Y;
-            this.Width = _shutickySetting.Size_Width;
-            this.Height = _shutickySetting.Size_Height;
-
         }
 
         /// <summary>
@@ -296,18 +262,6 @@ namespace 付箋アプリ
             SetShutickyColor(colorNumber);
         }
 
-
-        public void SetShutickyColor(int colorNumber)
-        {
-            _shutickySetting.ColorNumber = colorNumber;
-
-            string titleColorCode = PresetBackGroundColorSet[_shutickySetting.ColorNumber].TitleColor;
-            string bodyColorCode = PresetBackGroundColorSet[_shutickySetting.ColorNumber].BodyColor;
-            dockPanel_TitleBar.Background = new SolidColorBrush(ColorConverter.GetArbgColor(titleColorCode, 0));
-            dockPanel_Body.Background = new SolidColorBrush(ColorConverter.GetArbgColor(bodyColorCode, 0));
-        }
-
-
         /// <summary>
         /// 付箋ウィンドウが非アクティブになったとき
         /// </summary>
@@ -316,6 +270,8 @@ namespace 付箋アプリ
         private void Window_Deactivated(object sender, EventArgs e)
         {
             HideSettingGrid();
+
+            ExtractRemindDatas();
         }
 
         /// <summary>
@@ -377,7 +333,6 @@ namespace 付箋アプリ
                 return;
             }
 
-            //var fontSize = 0.0;
 
             TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
             double.TryParse(range_Body.GetPropertyValue(TextElement.FontSizeProperty).ToString(), out double fontSize);
@@ -408,7 +363,140 @@ namespace 付箋アプリ
             MinimizeButtonClicked?.Invoke(this, EventArgs.Empty);
         }
 
+        private void MenuItem_StrikeThrough_Click(object sender, RoutedEventArgs e)
+        {
+            StrikeThrough();
+        }
 
+        private void MenuItem_ChangeTextForegroundColor_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeTextForegroundColor();
+        }
+
+        private void MenuItem_ChangeTextBackgroundColor_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeTextBackgroundColor();
+        }
+
+        #endregion
+
+
+        /// <summary>
+        /// 内部付箋情報リストを更新
+        /// </summary>
+        public ShutickySetting GetShutickySetting()
+        {
+            //状態を更新してから
+            _shutickySetting.Position_X = this.Left;
+            _shutickySetting.Position_Y = this.Top;
+            //ただし幅と高さは、最小化されている場合は更新しない
+            if (_shutickySetting.DisplayStatus != DisplayStatus.Minimize)
+            {
+                _shutickySetting.Size_Height = this.Height;
+                _shutickySetting.Size_Width = this.Width;
+            }
+
+            _shutickySetting.IsPinned = this.Topmost;
+
+            return _shutickySetting;
+        }
+
+        /// <summary>
+        /// 付箋カラーをセット
+        /// </summary>
+        /// <param name="colorNumber"></param>
+        public void SetShutickyColor(int colorNumber)
+        {
+            _shutickySetting.ColorNumber = colorNumber;
+
+            string titleColorCode = _presetBackGroundColorSet[_shutickySetting.ColorNumber].TitleColor;
+            string bodyColorCode = _presetBackGroundColorSet[_shutickySetting.ColorNumber].BodyColor;
+            dockPanel_TitleBar.Background = new SolidColorBrush(ColorConverter.GetArbgColor(titleColorCode, 0));
+            dockPanel_Body.Background = new SolidColorBrush(ColorConverter.GetArbgColor(bodyColorCode, 0));
+        }
+
+        public void SetDisplayStatus(DisplayStatus displayStatus)
+        {
+            _shutickySetting.DisplayStatus = displayStatus;
+
+            //DisplayStatusに応じて
+            switch (_shutickySetting.DisplayStatus)
+            {
+                case DisplayStatus.Visible:
+                    {
+                        this.WindowState = WindowState.Normal;
+                        this.Visibility = Visibility.Visible;
+                        this.Activate();
+                        break;
+                    }
+                case DisplayStatus.Minimize:
+                    {
+                        //this.Visibility = Visibility.Visible;
+                        this.WindowState = WindowState.Minimized;
+                        break;
+                    }
+                case DisplayStatus.Hidden:
+                    {
+                        this.Visibility = Visibility.Hidden;
+                        break;
+                    }
+            }
+        }
+
+        public void SetDisplayPosition(double x, double y)
+        {
+            this.Top = y;
+            this.Left = x;
+        }
+
+        private void SetPinStatus(bool pinned)
+        {
+            this.Topmost = pinned;
+
+            if (pinned)
+            {
+                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_UnPin.png", UriKind.Relative));//アイコンをピン留め解除にする
+                button_Pin.ToolTip = "ピン留めを外す";
+            }
+            else
+            {
+                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_Pinned.png", UriKind.Relative));//アイコンをピン留めにする
+                button_Pin.ToolTip = "ピン留め";
+            }
+        }
+
+        /// <summary>
+        /// 付箋データの読み込み（rtf）
+        /// </summary>
+        private void LoadRTF(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            textBox_Title.Text = Path.GetFileNameWithoutExtension(filePath);
+
+            TextRange range_Body;
+            range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
+
+            using (FileStream fStream = new FileStream(filePath, FileMode.OpenOrCreate))
+            {
+                range_Body.Load(fStream, DataFormats.Rtf);
+            }
+        }
+        /// <summary>
+        /// 付箋データの書き込み(rtf)
+        /// </summary>
+        public void SaveRTF()
+        {
+            TextRange range_Body = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
+
+            using (FileStream fStream = new FileStream(_shutickySetting.FilePath, FileMode.Create))
+            {
+                range_Body.Save(fStream, DataFormats.Rtf);
+            }
+        }
 
 
         /// <summary>
@@ -505,85 +593,29 @@ namespace 付箋アプリ
             }
         }
 
+    }
 
-        public void SetDisplayStatus(DisplayStatus displayStatus)
+    public class ReminderData
+    {
+        public static readonly string _reminderTag ="tt::";
+
+        public static readonly List<string> ReminderPattern = new List<string>()
         {
-            _shutickySetting.DisplayStatus = displayStatus;
+            _reminderTag+ @"(?<Month>\d+?)月(?<Day>\d+?)日",
+            _reminderTag+@"(?<Month>\d\d)(?<Day>\d\d)",
+        };
 
-            //DisplayStatusに応じて
-            switch (_shutickySetting.DisplayStatus)
-            {
-                case DisplayStatus.Visible:
-                    {
-                        this.WindowState = WindowState.Normal;
-                        this.Visibility = Visibility.Visible;
-                        this.Activate();
-                        break;
-                    }
-                case DisplayStatus.Minimize:
-                    {
-                        //this.Visibility = Visibility.Visible;
-                        this.WindowState = WindowState.Minimized;
-                        break;
-                    }
-                case DisplayStatus.Hidden:
-                    {
-                        this.Visibility = Visibility.Hidden;
-                        break;
-                    }
-            }
-        }
+        public string Title
+        { get; set; } = "";
+        public string Content
+        { get; set; } = "";
+        public DateTime DateAndTime
+        { get; set; }
+        public DateTime RemindBefore
+        { get; set; }
 
-        public void SetDisplayPosition(double x, double y)
+        public ReminderData()
         {
-            this.Top = y;
-            this.Left = x;
         }
-
-        //private void ChangePinStatus()
-        //{
-        //    if (this.Topmost == true)
-        //    {//ピン留めされていた場合
-        //        SetPinStatus(false);
-        //    }
-        //    else
-        //    {//ピン留めされていない場合
-        //        SetPinStatus(true);
-        //    }
-        //}
-
-        private void SetPinStatus(bool pinned)
-        {
-            this.Topmost = pinned;
-
-            if(pinned)
-            {
-                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_UnPin.png", UriKind.Relative));//アイコンをピン留め解除にする
-                button_Pin.ToolTip = "ピン留めを外す";
-            }
-            else
-            {
-                image_Pin.Source = new BitmapImage(new Uri("Resources/Icon_Pinned.png", UriKind.Relative));//アイコンをピン留めにする
-                button_Pin.ToolTip = "ピン留め";
-            }
-        }
-
-
-        private void MenuItem_StrikeThrough_Click(object sender, RoutedEventArgs e)
-        {
-            StrikeThrough();
-        }
-
-        private void MenuItem_ChangeTextForegroundColor_Click(object sender, RoutedEventArgs e)
-        {
-            ChangeTextForegroundColor();
-        }
-
-        private void MenuItem_ChangeTextBackgroundColor_Click(object sender, RoutedEventArgs e)
-        {
-            ChangeTextBackgroundColor();
-        }
-
-
     }
 }

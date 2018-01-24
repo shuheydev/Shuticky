@@ -37,9 +37,12 @@
             this.toolStripMenuItem_ShowAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_MinimizeAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_Trash = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_Exit = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem_Help = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_Help = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_ClearTrash = new System.Windows.Forms.ToolStripMenuItem();
             this.shutickyNotifyIconContextMenuStrip.SuspendLayout();
             // 
             // shutickyNotifyIcon
@@ -58,11 +61,14 @@
             this.toolStripMenuItem_ShowAll,
             this.toolStripMenuItem_MinimizeAll,
             this.toolStripSeparator1,
+            this.toolStripMenuItem_Trash,
+            this.toolStripMenuItem_ClearTrash,
+            this.toolStripSeparator4,
             this.toolStripMenuItem_Exit,
             this.toolStripSeparator3,
             this.toolStripMenuItem_Help});
             this.shutickyNotifyIconContextMenuStrip.Name = "shutickyNotifyIconContextMenuStrip";
-            this.shutickyNotifyIconContextMenuStrip.Size = new System.Drawing.Size(221, 202);
+            this.shutickyNotifyIconContextMenuStrip.Size = new System.Drawing.Size(221, 244);
             // 
             // toolStripMenuItem_New
             // 
@@ -92,11 +98,27 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(217, 6);
             // 
+            // toolStripMenuItem_Trash
+            // 
+            this.toolStripMenuItem_Trash.Name = "toolStripMenuItem_Trash";
+            this.toolStripMenuItem_Trash.Size = new System.Drawing.Size(220, 36);
+            this.toolStripMenuItem_Trash.Text = "ゴミ箱";
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(217, 6);
+            // 
             // toolStripMenuItem_Exit
             // 
             this.toolStripMenuItem_Exit.Name = "toolStripMenuItem_Exit";
             this.toolStripMenuItem_Exit.Size = new System.Drawing.Size(220, 36);
             this.toolStripMenuItem_Exit.Text = "終了";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(217, 6);
             // 
             // toolStripMenuItem_Help
             // 
@@ -104,10 +126,11 @@
             this.toolStripMenuItem_Help.Size = new System.Drawing.Size(220, 36);
             this.toolStripMenuItem_Help.Text = "ヘルプ";
             // 
-            // toolStripSeparator3
+            // toolStripMenuItem_ClearTrash
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(217, 6);
+            this.toolStripMenuItem_ClearTrash.Name = "toolStripMenuItem_ClearTrash";
+            this.toolStripMenuItem_ClearTrash.Size = new System.Drawing.Size(246, 36);
+            this.toolStripMenuItem_ClearTrash.Text = "ゴミ箱を空にする";
             this.shutickyNotifyIconContextMenuStrip.ResumeLayout(false);
 
         }
@@ -124,5 +147,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_MinimizeAll;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_Help;
+        public System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_Trash;//App.xaml.csからゴミ箱の中身を動的に追加したりするので
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_ClearTrash;
     }
 }

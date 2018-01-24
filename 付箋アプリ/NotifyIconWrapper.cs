@@ -18,9 +18,8 @@ namespace 付箋アプリ
             this.toolStripMenuItem_ShowAll.Click += this.ContextMenuItem_ShowAll_Click;
             this.toolStripMenuItem_MinimizeAll.Click += this.ContextMenuItem_MinimizeAll_Click;
             this.toolStripMenuItem_Help.Click += this.ContextMenuItem_Help_Click;
+            this.toolStripMenuItem_ClearTrash.Click += this.ContextMenuItem_ClearTrash_Click;
         }
-
-
 
         public NotifyIconWrapper(IContainer container)
         {
@@ -57,6 +56,12 @@ namespace 付箋アプリ
         private void ContextMenuItem_MinimizeAll_Click(object sender, EventArgs e)
         {
             ContextMenuItem_MinimizeAll_Clicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler ContextMenuItem_ClearTrash_Clicked;
+        private void ContextMenuItem_ClearTrash_Click(object sender, EventArgs e)
+        {
+            ContextMenuItem_ClearTrash_Clicked?.Invoke(this, EventArgs.Empty);
         }
     }
 }
