@@ -393,12 +393,28 @@ namespace 付箋アプリ
         {
             var pd = new PrintDialog();
 
-
-            if ((pd.ShowDialog() == true))
+            try
             {
-                //pd.PrintVisual(richTextBox_Body as Visual, "printing as visual");
-                pd.PrintDocument((((IDocumentPaginatorSource)richTextBox_Body.Document).DocumentPaginator), $"「{this._shutickySetting.Title}」を印刷します。");
+                if (pd.ShowDialog() == true)
+                {
+
+                    //pd.PrintVisual(richTextBox_Body as Visual, "printing as visual");
+                    pd.PrintDocument((((IDocumentPaginatorSource)richTextBox_Body.Document).DocumentPaginator), $"「{this._shutickySetting.Title}」を印刷します。");
+
+                    var tempWidth = this.Width;
+
+                    this.Width = tempWidth - 1;
+                    this.Width = tempWidth;
+
+                }
             }
+            catch
+            {
+                this.IsEnabled = true;
+            }
+
+
+            
         }
 
 
@@ -675,6 +691,10 @@ namespace 付箋アプリ
             }
         }
 
+        private void MenuItem_Print_Click(object sender, RoutedEventArgs e)
+        {
+            PrintRichTextContent();
+        }
     }
 
     public class ReminderData

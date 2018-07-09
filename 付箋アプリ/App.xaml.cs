@@ -198,14 +198,14 @@ namespace 付箋アプリ
 
 
 
-            //すべてのリマインダを表示
-            ShowAllReminder();
+            ////すべてのリマインダを表示
+            //ShowAllReminder();
 
-            //リマインダータイマーをスタート
-            _remindTimer = new DispatcherTimer();
-            _remindTimer.Interval = TimeSpan.FromMinutes(1);
-            _remindTimer.Tick += RemindTimer_Tick;
-            _remindTimer.Start();
+            ////リマインダータイマーをスタート
+            //_remindTimer = new DispatcherTimer();
+            //_remindTimer.Interval = TimeSpan.FromMinutes(1);
+            //_remindTimer.Tick += RemindTimer_Tick;
+            //_remindTimer.Start();
         }
         protected override void OnExit(ExitEventArgs e)
         {
