@@ -77,7 +77,7 @@ namespace 付箋アプリ
                         var reminder = new ReminderData()
                         {
                             Title = _shutickySetting.Title,
-                            Content = sentence.Replace(ReminderData._reminderTag,""),
+                            Content = sentence.Replace(ReminderData._reminderTag, ""),
                             DateAndTime = DateTime.MinValue,
                             Year = match.Groups["Year"].Value,
                             Month = match.Groups["Month"].Value,
@@ -86,15 +86,15 @@ namespace 付箋アプリ
                             Minute = match.Groups["Minute"].Value,
                         };
                         string dateTimeString = "";
-                        if(!string.IsNullOrWhiteSpace(reminder.Year))
+                        if (!string.IsNullOrWhiteSpace(reminder.Year))
                         {
                             dateTimeString += $"{reminder.Year}年";
-                            
+
                         }
                         else
                         {
                             reminder.IntervalType = RegularIntervalType.EveryYear;
-                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Month))
                         {
@@ -105,43 +105,43 @@ namespace 付箋アプリ
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryMonth;
-                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                                reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Day))
                         {
                             dateTimeString += $"{reminder.Day}日";
-                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                         }
                         else
                         {
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryDay;
-                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                                reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Hour))
                         {
                             dateTimeString += $"{reminder.Hour}時";
-                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                            reminder.RemindBefore = new TimeSpan(0, 0, 30, 0);
                         }
                         else
                         {
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryHour;
-                                reminder.RemindBefore = new TimeSpan(0,1,0,0);
+                                reminder.RemindBefore = new TimeSpan(0, 1, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Minute))
                         {
                             dateTimeString += $"{reminder.Minute}分";
-                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                            reminder.RemindBefore = new TimeSpan(0, 0, 30, 0);
                         }
                         else
                         {
-                            
+
                         }
 
                         DateTime.TryParse(dateTimeString, out DateTime dateAndTime);
@@ -378,6 +378,26 @@ namespace 付箋アプリ
 
                 e.Handled = true;
                 return;
+            }
+
+            if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                PrintRichTextContent();
+
+                e.Handled = true;
+                return;
+            }
+        }
+
+        private void PrintRichTextContent()
+        {
+            var pd = new PrintDialog();
+
+
+            if ((pd.ShowDialog() == true))
+            {
+                //pd.PrintVisual(richTextBox_Body as Visual, "printing as visual");
+                pd.PrintDocument((((IDocumentPaginatorSource)richTextBox_Body.Document).DocumentPaginator), $"「{this._shutickySetting.Title}」を印刷します。");
             }
         }
 

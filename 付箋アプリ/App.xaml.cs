@@ -627,10 +627,10 @@ namespace 付箋アプリ
                                                .OrderBy(reminder => reminder.DateAndTime)
                                                .ThenBy(reminder => reminder.Title);
 
-            var remindContents="もうすぐです\r\n"+ string.Join("\r\n", nearlyReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}"))+"\r\n";
+            var remindContents = "もうすぐです\r\n" + string.Join("\r\n", nearlyReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}")) + "\r\n";
             remindContents += "期限切れ\r\n" + string.Join("\r\n", expiredReminders.Select(reminder => $"{reminder.DateAndTime.ToString("yyyy年MM月dd日HH時mm分")}：{reminder.Content}"));
             MessageBox.Show(remindContents, "予定一覧", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-       
+
         }
 
         private void AddContextMenuItem_Trash(string trashedRtfFileNameWithoutExtension)
@@ -845,7 +845,8 @@ namespace 付箋アプリ
             }
             catch
             {
-                strmWriter.Dispose();
+                if (strmWriter != null)
+                    strmWriter.Dispose();
 
                 return;
             }
