@@ -112,7 +112,9 @@
                         <MenuItem Name="menuItem_StrikeThrough" Header="消し線" Click="MenuItem_StrikeThrough_Click"/>
                         <MenuItem Name="menuItem_ChangeTextForegroundColor" Header="文字色" Click="MenuItem_ChangeTextForegroundColor_Click"/>
                         <MenuItem Name="menuItem_ChangeTextBackgroundColor" Header="背景色" Click="MenuItem_ChangeTextBackgroundColor_Click"/>
-                    </ContextMenu>
+                        <Separator/>
+<MenuItem Name="menuItem_Print" Header="印刷" Click="MenuItem_Print_Click"/>
+</ContextMenu>
                 </RichTextBox.ContextMenu>
             </RichTextBox>
         </DockPanel>

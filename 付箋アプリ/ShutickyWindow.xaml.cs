@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Text.RegularExpressions;
-
+using System.Printing;
 
 namespace 付箋アプリ
 {
@@ -77,7 +77,7 @@ namespace 付箋アプリ
                         var reminder = new ReminderData()
                         {
                             Title = _shutickySetting.Title,
-                            Content = sentence.Replace(ReminderData._reminderTag,""),
+                            Content = sentence.Replace(ReminderData._reminderTag, ""),
                             DateAndTime = DateTime.MinValue,
                             Year = match.Groups["Year"].Value,
                             Month = match.Groups["Month"].Value,
@@ -86,15 +86,15 @@ namespace 付箋アプリ
                             Minute = match.Groups["Minute"].Value,
                         };
                         string dateTimeString = "";
-                        if(!string.IsNullOrWhiteSpace(reminder.Year))
+                        if (!string.IsNullOrWhiteSpace(reminder.Year))
                         {
                             dateTimeString += $"{reminder.Year}年";
-                            
+
                         }
                         else
                         {
                             reminder.IntervalType = RegularIntervalType.EveryYear;
-                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Month))
                         {
@@ -105,43 +105,43 @@ namespace 付箋アプリ
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryMonth;
-                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                                reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Day))
                         {
                             dateTimeString += $"{reminder.Day}日";
-                            reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                            reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                         }
                         else
                         {
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryDay;
-                                reminder.RemindBefore = new TimeSpan(1,0,0,0);
+                                reminder.RemindBefore = new TimeSpan(1, 0, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Hour))
                         {
                             dateTimeString += $"{reminder.Hour}時";
-                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                            reminder.RemindBefore = new TimeSpan(0, 0, 30, 0);
                         }
                         else
                         {
                             if (string.IsNullOrWhiteSpace(dateTimeString))
                             {
                                 reminder.IntervalType = RegularIntervalType.EveryHour;
-                                reminder.RemindBefore = new TimeSpan(0,1,0,0);
+                                reminder.RemindBefore = new TimeSpan(0, 1, 0, 0);
                             }
                         }
                         if (!string.IsNullOrWhiteSpace(reminder.Minute))
                         {
                             dateTimeString += $"{reminder.Minute}分";
-                            reminder.RemindBefore = new TimeSpan(0,0,30,0);
+                            reminder.RemindBefore = new TimeSpan(0, 0, 30, 0);
                         }
                         else
                         {
-                            
+
                         }
 
                         DateTime.TryParse(dateTimeString, out DateTime dateAndTime);
@@ -378,6 +378,66 @@ namespace 付箋アプリ
 
                 e.Handled = true;
                 return;
+            }
+
+            if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                PrintRichTextContent();
+
+                e.Handled = true;
+                return;
+            }
+        }
+
+
+        /// <summary>
+        /// https://blogs.msdn.microsoft.com/prajakta/2007/01/02/printing-contents-of-wpf-richtextbox/
+        /// を参考にした。感謝したい。
+        /// もう少し余白を空けたい。
+        /// </summary>
+        private void PrintRichTextContent()
+        {
+            var sourceDocument = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
+
+            var memstrm = new MemoryStream();
+
+            //flowDocumentを複製するために、一度MemoryStreamに書き込んでいる。
+            sourceDocument.Save(memstrm, DataFormats.Xaml);
+
+
+            var flowDocumentCopy = new FlowDocument();
+
+            var copyDocumentRange = new TextRange(flowDocumentCopy.ContentStart, flowDocumentCopy.ContentEnd);
+
+
+            //MemoryStreamから読み込み
+            copyDocumentRange.Load(memstrm, DataFormats.Xaml);
+
+
+            PrintDocumentImageableArea ia = null;
+
+
+            var docWriter = PrintQueue.CreateXpsDocumentWriter(ref ia);
+
+
+            if(docWriter!=null && ia !=null)
+            {
+                var paginator = ((IDocumentPaginatorSource)flowDocumentCopy).DocumentPaginator;
+
+                paginator.PageSize = new Size(ia.MediaSizeWidth, ia.MediaSizeHeight);
+
+                var pagePadding = flowDocumentCopy.PagePadding;
+
+                flowDocumentCopy.PagePadding = new Thickness(
+                    Math.Max(ia.OriginWidth,pagePadding.Left),
+                    Math.Max(ia.OriginHeight,pagePadding.Top),
+                    Math.Max(ia.MediaSizeWidth-(ia.OriginWidth+ia.ExtentWidth),pagePadding.Right),
+                    Math.Max(ia.MediaSizeHeight-(ia.OriginHeight+ia.ExtentHeight),pagePadding.Bottom)
+                    );
+
+                flowDocumentCopy.ColumnWidth = double.PositiveInfinity;
+
+                docWriter.Write(paginator);
             }
         }
 
@@ -655,6 +715,10 @@ namespace 付箋アプリ
             }
         }
 
+        private void MenuItem_Print_Click(object sender, RoutedEventArgs e)
+        {
+            PrintRichTextContent();
+        }
     }
 
     public class ReminderData
