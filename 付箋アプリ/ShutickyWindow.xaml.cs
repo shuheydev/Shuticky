@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Text.RegularExpressions;
-
+using System.Printing;
 
 namespace 付箋アプリ
 {
@@ -389,32 +389,56 @@ namespace 付箋アプリ
             }
         }
 
+
+        /// <summary>
+        /// https://blogs.msdn.microsoft.com/prajakta/2007/01/02/printing-contents-of-wpf-richtextbox/
+        /// を参考にした。感謝したい。
+        /// 
+        /// </summary>
         private void PrintRichTextContent()
         {
-            var pd = new PrintDialog();
+            var sourceDocument = new TextRange(richTextBox_Body.Document.ContentStart, richTextBox_Body.Document.ContentEnd);
 
-            try
+            var memstrm = new MemoryStream();
+
+            //flowDocumentを複製するために、一度MemoryStreamに書き込んでいる。
+            sourceDocument.Save(memstrm, DataFormats.Xaml);
+
+
+            var flowDocumentCopy = new FlowDocument();
+
+            var copyDocumentRange = new TextRange(flowDocumentCopy.ContentStart, flowDocumentCopy.ContentEnd);
+
+
+            //MemoryStreamから読み込み
+            copyDocumentRange.Load(memstrm, DataFormats.Xaml);
+
+
+            PrintDocumentImageableArea ia = null;
+
+
+            var docWriter = PrintQueue.CreateXpsDocumentWriter(ref ia);
+
+
+            if(docWriter!=null && ia !=null)
             {
-                if (pd.ShowDialog() == true)
-                {
+                var paginator = ((IDocumentPaginatorSource)flowDocumentCopy).DocumentPaginator;
 
-                    //pd.PrintVisual(richTextBox_Body as Visual, "printing as visual");
-                    pd.PrintDocument((((IDocumentPaginatorSource)richTextBox_Body.Document).DocumentPaginator), $"「{this._shutickySetting.Title}」を印刷します。");
+                paginator.PageSize = new Size(ia.MediaSizeWidth, ia.MediaSizeHeight);
 
-                    var tempWidth = this.Width;
+                var pagePadding = flowDocumentCopy.PagePadding;
 
-                    this.Width = tempWidth - 1;
-                    this.Width = tempWidth;
+                flowDocumentCopy.PagePadding = new Thickness(
+                    Math.Max(ia.OriginWidth,pagePadding.Left),
+                    Math.Max(ia.OriginHeight,pagePadding.Top),
+                    Math.Max(ia.MediaSizeWidth-(ia.OriginWidth+ia.ExtentWidth),pagePadding.Right),
+                    Math.Max(ia.MediaSizeHeight-(ia.OriginHeight+ia.ExtentHeight),pagePadding.Bottom)
+                    );
 
-                }
+                flowDocumentCopy.ColumnWidth = double.PositiveInfinity;
+
+                docWriter.Write(paginator);
             }
-            catch
-            {
-                this.IsEnabled = true;
-            }
-
-
-            
         }
 
 
