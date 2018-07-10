@@ -402,7 +402,7 @@ namespace 付箋アプリ
             var memstrm = new MemoryStream();
 
             //flowDocumentを複製するために、一度MemoryStreamに書き込んでいる。
-            sourceDocument.Save(memstrm, DataFormats.Xaml);
+            sourceDocument.Save(memstrm, DataFormats.XamlPackage);
 
 
             var flowDocumentCopy = new FlowDocument();
@@ -411,7 +411,7 @@ namespace 付箋アプリ
 
 
             //MemoryStreamから読み込み
-            copyDocumentRange.Load(memstrm, DataFormats.Xaml);
+            copyDocumentRange.Load(memstrm, DataFormats.XamlPackage);
 
 
             PrintDocumentImageableArea ia = null;
@@ -426,14 +426,16 @@ namespace 付箋アプリ
 
                 paginator.PageSize = new Size(ia.MediaSizeWidth, ia.MediaSizeHeight);
 
-                var pagePadding = flowDocumentCopy.PagePadding;
+                //var pagePadding = flowDocumentCopy.PagePadding;
 
-                flowDocumentCopy.PagePadding = new Thickness(
-                    Math.Max(ia.OriginWidth,pagePadding.Left),
-                    Math.Max(ia.OriginHeight,pagePadding.Top),
-                    Math.Max(ia.MediaSizeWidth-(ia.OriginWidth+ia.ExtentWidth),pagePadding.Right),
-                    Math.Max(ia.MediaSizeHeight-(ia.OriginHeight+ia.ExtentHeight),pagePadding.Bottom)
-                    );
+                //flowDocumentCopy.PagePadding = new Thickness(
+                //    Math.Max(ia.OriginWidth,pagePadding.Left),
+                //    Math.Max(ia.OriginHeight,pagePadding.Top),
+                //    Math.Max(ia.MediaSizeWidth-(ia.OriginWidth+ia.ExtentWidth),pagePadding.Right),
+                //    Math.Max(ia.MediaSizeHeight-(ia.OriginHeight+ia.ExtentHeight),pagePadding.Bottom)
+                //    );
+
+                flowDocumentCopy.PagePadding = new Thickness(50, 50, 50, 50);
 
                 flowDocumentCopy.ColumnWidth = double.PositiveInfinity;
 
