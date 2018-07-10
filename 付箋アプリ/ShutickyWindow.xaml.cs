@@ -420,7 +420,7 @@ namespace 付箋アプリ
             var docWriter = PrintQueue.CreateXpsDocumentWriter(ref ia);
 
 
-            if(docWriter!=null && ia !=null)
+            if (docWriter != null && ia != null)
             {
                 var paginator = ((IDocumentPaginatorSource)flowDocumentCopy).DocumentPaginator;
 
@@ -428,11 +428,21 @@ namespace 付箋アプリ
 
                 //var pagePadding = flowDocumentCopy.PagePadding;
 
+                ////pagePaddingの中身がNaNになっている場合があるので、その場合はNaNを0とする。
+                //if (double.IsNaN(pagePadding.Left))
+                //    pagePadding.Left = 0;
+                //if (double.IsNaN(pagePadding.Top))
+                //    pagePadding.Top = 0;
+                //if (double.IsNaN(pagePadding.Right))
+                //    pagePadding.Right = 0;
+                //if (double.IsNaN(pagePadding.Bottom))
+                //    pagePadding.Bottom = 0;
+
                 //flowDocumentCopy.PagePadding = new Thickness(
-                //    Math.Max(ia.OriginWidth,pagePadding.Left),
-                //    Math.Max(ia.OriginHeight,pagePadding.Top),
-                //    Math.Max(ia.MediaSizeWidth-(ia.OriginWidth+ia.ExtentWidth),pagePadding.Right),
-                //    Math.Max(ia.MediaSizeHeight-(ia.OriginHeight+ia.ExtentHeight),pagePadding.Bottom)
+                //    Math.Max(ia.OriginWidth, pagePadding.Left),
+                //    Math.Max(ia.OriginHeight, pagePadding.Top),
+                //    Math.Max(ia.MediaSizeWidth - (ia.OriginWidth + ia.ExtentWidth), pagePadding.Right),
+                //    Math.Max(ia.MediaSizeHeight - (ia.OriginHeight + ia.ExtentHeight), pagePadding.Bottom)
                 //    );
 
                 flowDocumentCopy.PagePadding = new Thickness(50, 50, 50, 50);
