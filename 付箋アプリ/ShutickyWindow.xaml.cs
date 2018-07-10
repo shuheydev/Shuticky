@@ -393,7 +393,7 @@ namespace 付箋アプリ
         /// <summary>
         /// https://blogs.msdn.microsoft.com/prajakta/2007/01/02/printing-contents-of-wpf-richtextbox/
         /// を参考にした。感謝したい。
-        /// 
+        /// もう少し余白を空けたい。
         /// </summary>
         private void PrintRichTextContent()
         {
