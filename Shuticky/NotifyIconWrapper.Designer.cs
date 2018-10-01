@@ -1,4 +1,4 @@
-﻿namespace 付箋アプリ
+﻿namespace Shuticky
 {
     partial class NotifyIconWrapper
     {

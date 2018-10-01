@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "付箋アプリ", "付箋アプリ\付箋アプリ.csproj", "{0612C1D1-D132-4FFF-8D6A-C509016B56E3}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ShutickyInstaller", "ShutickyInstaller\ShutickyInstaller.vdproj", "{468B9A75-4664-4176-88D6-32AB967DA740}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shuticky", "Shuticky\Shuticky.csproj", "{0612C1D1-D132-4FFF-8D6A-C509016B56E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,17 +27,11 @@ Global
 		{0612C1D1-D132-4FFF-8D6A-C509016B56E3}.Release|x64.Build.0 = Release|x64
 		{0612C1D1-D132-4FFF-8D6A-C509016B56E3}.Release|x86.ActiveCfg = Release|x86
 		{0612C1D1-D132-4FFF-8D6A-C509016B56E3}.Release|x86.Build.0 = Release|x86
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Debug|Any CPU.ActiveCfg = Debug
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Debug|x64.ActiveCfg = Debug
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Debug|x86.ActiveCfg = Debug
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|Any CPU.ActiveCfg = Release
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|Any CPU.Build.0 = Release
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|x64.ActiveCfg = Release
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|x64.Build.0 = Release
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|x86.ActiveCfg = Release
-		{468B9A75-4664-4176-88D6-32AB967DA740}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF6194D7-BAF8-4D25-8700-6691B99F4C4A}
 	EndGlobalSection
 EndGlobal

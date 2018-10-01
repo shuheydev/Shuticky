@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0612C1D1-D132-4FFF-8D6A-C509016B56E3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>付箋アプリ</RootNamespace>
-    <AssemblyName>付箋アプリ</AssemblyName>
+    <RootNamespace>Shuticky</RootNamespace>
+    <AssemblyName>Shuticky</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetPlatformVersion>10.0</TargetPlatformVersion>
     <FileAlignment>512</FileAlignment>
@@ -57,7 +57,7 @@
     <ManifestCertificateThumbprint>841BF57E2B5F0011FBEDA629F91204D1A45ACFC8</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>付箋アプリ_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Shuticky_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -192,7 +192,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="付箋アプリ_TemporaryKey.pfx" />
+    <None Include="Shuticky_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

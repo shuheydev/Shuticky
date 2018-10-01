@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.IO;
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

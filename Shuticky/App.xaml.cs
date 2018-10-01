@@ -14,7 +14,7 @@ using System.Windows.Threading;
 using System.Text.RegularExpressions;
 
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     /// <summary>
     /// App.xaml の相互作用ロジック
@@ -31,13 +31,13 @@ namespace 付箋アプリ
         private Mutex _mutex;
 
         //アプリケーション名
-        private readonly string _applicationName = 付箋アプリ.Properties.Settings.Default.ApplicationName;
+        private readonly string _applicationName = Shuticky.Properties.Settings.Default.ApplicationName;
         private string _shutickyNoteApplicationFolderPath = "";
         private string _shutickySettingFilePath = "";
-        private readonly string _shutickySettingFileName = 付箋アプリ.Properties.Settings.Default.SettingFileName;
-        private readonly string _defaultShutickyName = 付箋アプリ.Properties.Settings.Default.DefaultShutickyName;
-        private readonly string _onedriveCommonApplicationFolderName = 付箋アプリ.Properties.Settings.Default.OnedriveCommonApplicationFolderName;
-        private readonly string _appTrashcanFolderName = 付箋アプリ.Properties.Settings.Default.AppTrashcanName;
+        private readonly string _shutickySettingFileName = Shuticky.Properties.Settings.Default.SettingFileName;
+        private readonly string _defaultShutickyName = Shuticky.Properties.Settings.Default.DefaultShutickyName;
+        private readonly string _onedriveCommonApplicationFolderName = Shuticky.Properties.Settings.Default.OnedriveCommonApplicationFolderName;
+        private readonly string _appTrashcanFolderName = Shuticky.Properties.Settings.Default.AppTrashcanName;
         private string _helpFilePath = "";
         private string _shutickyTrashcanFolderPath = "";
 
@@ -46,12 +46,12 @@ namespace 付箋アプリ
         private List<ShutickyWindow> _shutickyWindows = new List<ShutickyWindow>();
 
 
-        private double _positionIncrementX = 付箋アプリ.Properties.Settings.Default.PositionIncrementX;
-        private double _positionIncrementY = 付箋アプリ.Properties.Settings.Default.PositionIncrementY;
-        private double _defaultPositionX = 付箋アプリ.Properties.Settings.Default.DefaultPositionX;
-        private double _defaultPositionY = 付箋アプリ.Properties.Settings.Default.DefaultPositionY;
-        private double _defaultWidth = 付箋アプリ.Properties.Settings.Default.DefaultWidth;
-        private double _defaultHeight = 付箋アプリ.Properties.Settings.Default.DefaultHeight;
+        private double _positionIncrementX = Shuticky.Properties.Settings.Default.PositionIncrementX;
+        private double _positionIncrementY = Shuticky.Properties.Settings.Default.PositionIncrementY;
+        private double _defaultPositionX = Shuticky.Properties.Settings.Default.DefaultPositionX;
+        private double _defaultPositionY = Shuticky.Properties.Settings.Default.DefaultPositionY;
+        private double _defaultWidth = Shuticky.Properties.Settings.Default.DefaultWidth;
+        private double _defaultHeight = Shuticky.Properties.Settings.Default.DefaultHeight;
 
 
         #region イベント
@@ -83,7 +83,7 @@ namespace 付箋アプリ
             var appExeFilePath = asm.Location;
             var appExeFolderPath = Path.GetDirectoryName(appExeFilePath);
             _helpFilePath = Path.Combine(appExeFolderPath, "help.html");
-            File.WriteAllText(_helpFilePath, 付箋アプリ.Properties.Resources.Help);
+            File.WriteAllText(_helpFilePath, Shuticky.Properties.Resources.Help);
 
 
             //アプリケーション用のフォルダを作成

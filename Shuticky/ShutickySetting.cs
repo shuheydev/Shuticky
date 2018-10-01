@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     interface IShutickySetting
     {

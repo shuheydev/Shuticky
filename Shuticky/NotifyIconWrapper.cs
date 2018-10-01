@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     //常駐アプリの作成方法の参考：https://garafu.blogspot.jp/2015/06/dev-tasktray-residentapplication.html
 

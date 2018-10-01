@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     static class ColorConverter
     {

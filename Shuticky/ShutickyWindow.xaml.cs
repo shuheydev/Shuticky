@@ -14,7 +14,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Printing;
 
-namespace 付箋アプリ
+namespace Shuticky
 {
     /// <summary>
     /// 付箋Window.xaml の相互作用ロジック

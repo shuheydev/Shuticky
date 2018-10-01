@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace 付箋アプリ.Properties {
+namespace Shuticky.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
